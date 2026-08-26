@@ -1,0 +1,8 @@
+# Project-local agent skills
+.agents/
+.claude/
+skills-lock.json
+
+# Project-local MCP configuration
+.codex/
+.mcp.json

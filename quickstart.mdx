@@ -1,47 +1,87 @@
 ---
-title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+title: "Run Kalligator locally"
+sidebarTitle: "Local quickstart"
+description: "Install development dependencies and start the Kalligator desktop system on macOS."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+This guide starts the control plane, Worker, desktop app, storage services, Agent image, and bundled Package command images.
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+<Info>
+  The current bootstrap script uses macOS command syntax. Run this guide on macOS.
+</Info>
 
 ## Prerequisites
 
-Before you begin, you must have:
+Before you begin, install:
 
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
+- Docker Desktop or another active Docker-compatible engine;
+- Python 3.12 or later;
+- [`uv`](https://docs.astral.sh/uv/);
+- Node.js 22.12 or later; and
+- npm.
 
-## Get started
+You also need a local checkout of the Kalligator source repository.
+
+## Prepare the repository
+
+Run these commands from the Kalligator source repository:
+
+```bash
+cd control-plane
+uv sync --extra dev
+
+cd ../worker
+uv sync --extra dev
+
+cd ../desktop
+npm ci
+
+cd ..
+```
+
+## Start Kalligator
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
+  <Step title="Start Docker">
+    Confirm that your Docker engine is running.
 
     ```bash
-    npm install your-package
+    docker info
     ```
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
+  <Step title="Run the development system">
+    Start Kalligator from the repository root.
 
     ```bash
-    your-cli init
+    ./scripts/dev.sh
     ```
+
+    The first run builds the Agent image and the Android, Frida, and Traffic Package command images. It also creates a local `.env` file and starts PostgreSQL and Garage.
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
-
-    ```bash
-    your-cli start
-    ```
+  <Step title="Wait for the desktop app">
+    The script starts the control plane on port `8100`, the Worker on port `8200`, and the Vite renderer on port `5173`. It then opens the Electron desktop app.
+  </Step>
+  <Step title="Create your first Project">
+    Use the desktop app to create a Project. New Projects can start without an APK, scope document, or device.
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+<Check>
+  Kalligator is ready when the desktop app opens and the Worker reports healthy local services.
+</Check>
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
+## Local state
+
+The development system writes generated configuration and Worker state under `.env` and `.dev/`. Do not commit these files.
+
+The first development run enables all bundled Packages in `.dev/worker/packages.json`. Later changes in **Settings** are preserved.
+
+## Stop the system
+
+Press `Control-C` in the terminal that runs `./scripts/dev.sh`. The script stops the local API, Worker, Vite, and Electron processes. Docker keeps the PostgreSQL and Garage containers available for the next run.
+
+## Next steps
+
+- Read [Architecture](/concepts/architecture) before you change system boundaries.
+- Read [Packages](/concepts/packages) before you add a domain capability.
+- Follow [Android testing](/guides/android-testing) before you attach an Android Test Device.

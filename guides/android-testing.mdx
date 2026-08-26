@@ -1,0 +1,82 @@
+---
+title: "Prepare Android testing"
+description: "Prepare a rooted local emulator and the Kalligator Packages used for authorized Android security research."
+---
+
+Kalligator supports authorized Android testing on one rooted local emulator per Worker. The normal emulator window remains available for login, consent, CAPTCHA, and manual reproduction.
+
+<Warning>
+  Confirm written authorization and test scope before you import an app or connect a device.
+</Warning>
+
+## Supported environment
+
+Prepare:
+
+- one rooted Android emulator;
+- local ADB access;
+- an authorized APK or compatible split APK set;
+- a dedicated test account when the app requires an account; and
+- enough local storage for App Builds, snapshots, packet captures, and command images.
+
+Kalligator does not select a device for you. Set the shared `ADB_SERIAL` Worker Setting to the exact emulator serial.
+
+## Required Packages
+
+An Android research Project normally uses:
+
+- `security-engagement` for authorized scope;
+- `android` for App Builds, the Device Shell, static analysis, and device operations;
+- `mobilerun` for structured UI observation and direct actions;
+- `frida` for Runtime Instrumentation;
+- `traffic` for packet capture and decryption;
+- `research` for Observations and Findings;
+- `artifacts` for selected evidence; and
+- `hackerone` when you need a HackerOne submission packet.
+
+The Project must grant only the cross-Package reads needed by the workflow.
+
+## Prepare the Project
+
+<Steps>
+  <Step title="Record the authorized scope">
+    Create or select a Project. Add the tested application, accounts, environments, and excluded actions to the security engagement scope.
+  </Step>
+  <Step title="Select the emulator">
+    Open **Settings** and set `ADB_SERIAL` to the rooted emulator serial. Run the Android readiness command before you install an app.
+  </Step>
+  <Step title="Import the App Build">
+    Import one APK or one compatible split set. Review the package name, version, hashes, and signing certificates. Approve the first Signer Baseline before installation.
+  </Step>
+  <Step title="Start a new Chat">
+    Start the Chat after you finish Package configuration. The Chat keeps its Package versions, commands, image IDs, and grants for its lifetime.
+  </Step>
+</Steps>
+
+## Research workflow
+
+Use the cheapest check that can answer the current question. Record selected outputs as evidence.
+
+1. Inspect APK identity and the manifest.
+2. Run focused static analysis with `aapt2`, JADX, Apktool, `readelf`, `nm`, or `strings`.
+3. Install and launch the accepted App Build on the selected emulator.
+4. Use Mobilerun for bounded UI observation and direct actions.
+5. Capture an App Data Snapshot when private app data is relevant and authorized.
+6. Use Frida for a specific runtime question.
+7. Capture one controlled app action when readable network traffic is relevant.
+8. Record an Observation before you create a Finding.
+9. Link the Finding to supporting Observations and selected evidence.
+
+## Traffic evidence
+
+Traffic Inspection combines a packet capture with matching TLS session secrets. Kalligator reports success only when the saved data produces readable protocol content.
+
+PCAP validity, TLS-key capture, protocol decryption, request pairing, Frida state, and crash evidence are separate facts. A failure in one step does not prove that the other steps failed.
+
+<Note>
+  HTTP/3 decryption depends on the captured secrets and installed tools. Preserve unsupported traffic instead of reporting a false success.
+</Note>
+
+## Current limits
+
+The first supported environment does not include device pools, automatic Play Store acquisition, stock physical devices, an embedded device screen, or live proxy interception.

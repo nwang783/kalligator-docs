@@ -1,33 +1,41 @@
-> **First-time setup**: Customize this file for your project. Prompt the user to customize this file for their project.
-> For Mintlify product knowledge (components, configuration, writing standards),
-> install the Mintlify skill: `npx skills add https://mintlify.com/docs`
-
 # Documentation project instructions
 
 ## About this project
 
-- This is a documentation site built on [Mintlify](https://mintlify.com)
-- Pages are MDX files with YAML frontmatter
-- Configuration lives in `docs.json`
-- Use the Mintlify MCP server, `https://mcp.mintlify.com`, to edit content and settings via MCP
-- Use the Mintlify docs MCP server, `https://www.mintlify.com/docs/mcp`, to query information about using Mintlify via MCP
+- This repository contains the Mintlify documentation site for Kalligator.
+- Kalligator source material lives in `../mobile-lab`.
+- Pages use MDX with YAML frontmatter.
+- Site configuration lives in `docs.json`.
+- Use the repository-local Mintlify skill and Index MCP for current Mintlify syntax.
 
 ## Terminology
 
-{/* Add product-specific terms and preferred usage */}
-{/* Example: Use "workspace" not "project", "member" not "user" */}
+- Use **Kalligator** for the product name.
+- Use **Account**, not user profile.
+- Use **Team**, not tenant or organization.
+- Use **Project**, not engagement or workspace.
+- Use **Chat**, not session, trace, or transcript.
+- Use **Package**, not plugin.
+- Use **Android Test Device**, not target.
+- Use **Observation** for a research fact.
+- Use **Finding** for a vulnerability claim supported by Observations.
+- Keep stable `mobile-lab`, `mobilelab`, and `kaligator` technical identifiers unchanged.
 
-## Style preferences
+## Style
 
-{/* Add any project-specific style rules below */}
-
-- Use active voice and second person ("you")
-- Keep sentences concise — one idea per sentence
-- Use sentence case for headings
-- Bold for UI elements: Click **Settings**
-- Code formatting for file names, commands, paths, and code references
+- Use ASD-STE100 Simplified Technical English.
+- Use active voice and second person.
+- Keep one main idea in each sentence.
+- Use sentence case for headings.
+- Use bold text for UI labels, such as **Settings**.
+- Use code formatting for file names, commands, paths, and identifiers.
+- Use root-relative links without file extensions for internal pages.
+- Use built-in Mintlify components before custom MDX components or CSS.
 
 ## Content boundaries
 
-{/* Define what should and shouldn't be documented */}
-{/* Example: Don't document internal admin features */}
+- Document supported product behavior and reader workflows.
+- State authorization requirements for security testing.
+- Do not publish secrets, live credentials, private targets, or raw vulnerability evidence.
+- Do not present deferred work as supported behavior.
+- Do not copy internal ADR text without adapting it for the reader.

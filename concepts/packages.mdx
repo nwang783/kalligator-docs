@@ -1,0 +1,59 @@
+---
+title: "Packages"
+description: "Learn how Packages add bounded cyber capabilities to the Kalligator kernel."
+---
+
+A Package is an installable harness extension. It can add Agent guidance, commands, settings, services, and optional desktop sections without adding domain rules to the Kalligator kernel.
+
+Do not call a Package a plugin. **Package** is the product term and the security boundary.
+
+## Package capabilities
+
+A Package can provide:
+
+- one prompt file;
+- workspace or host commands;
+- versioned command images for workspace commands;
+- Resource Locks for host commands;
+- optional desktop sections;
+- declared read access to other Package namespaces;
+- one local Package Service;
+- Worker Settings and Package Secret names; and
+- optional Project Setups.
+
+## Command boundaries
+
+Workspace commands run with the Chat workspace and a Package-scoped token. A Package can place a workspace command in its own versioned command image.
+
+Host commands run through the Worker. They can use only the host capabilities declared by the Package. A Resource Lock prevents two commands from using the same local resource at the same time.
+
+The Agent container receives only a command-dispatch token. The Worker creates a fresh Package-scoped token for each command.
+
+<Warning>
+  A Package Service has no Project token. Use a Package command when work must read or write Project data.
+</Warning>
+
+## Configuration and secrets
+
+Project Package Configuration selects the Packages, visible desktop sections, and cross-Package read grants for one Project.
+
+Worker Settings store non-secret machine values, such as `ADB_SERIAL`. Package Secrets use operating-system credential protection. The renderer, Agent container, control plane, and Project data receive only set or missing status.
+
+## Standard Packages
+
+| Package | Responsibility |
+| --- | --- |
+| `research` | Observations, Findings, and promotion from evidence to a supported claim |
+| `artifacts` | Curated records that reference immutable Blobs |
+| `security-engagement` | Authorized scope and targets |
+| `android` | APK Intake, App Builds, static analysis, selected-device commands, app data, and crash evidence |
+| `mobilerun` | Structured Android UI observation and direct actions |
+| `frida` | Runtime Instrumentation and TLS session-secret capture |
+| `traffic` | Packet capture, decryption, and Capture Bundles |
+| `hackerone` | Submission workflow over granted research data |
+
+## Durable Package data
+
+Each Package owns its Project Records. A Package can read another namespace only through an explicit grant.
+
+A **Project Record** is a small structured item. A **Blob** is immutable file content stored by hash. Findings cite supported Observations and selected evidence instead of raw tool output alone.
