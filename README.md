@@ -1,6 +1,6 @@
 # Kalligator documentation
 
-This repository contains the Mintlify documentation site for Kalligator, published at https://doc.kalligator.com.
+This repository contains the Mintlify documentation site for Kalligator, published at https://docs.kalligator.com.
 Mintlify deploys the site automatically when you push to `main`.
 
 ## Preview

@@ -1,7 +1,7 @@
 {
   "info": {
     "title": "Kalligator API",
-    "description": "The Kalligator API gives you all the hacker functions of the website. Use it to find programs, write and submit reports, upload evidence, and reply to the triage agent.\n\nSend `Authorization: Bearer kal_...` with an API key from the **API keys** section of your account page. The full guide is at https://doc.kalligator.com/api-reference/introduction."
+    "description": "The Kalligator API gives you all the hacker functions of the website. Use it to find programs, write and submit reports, upload evidence, and reply to the triage agent.\n\nSend `Authorization: Bearer kal_...` with an API key from the **API keys** section of your account page. The full guide is at https://docs.kalligator.com/api-reference/introduction."
   },
   "servers": [
     {

@@ -7,7 +7,7 @@ description: Submit and manage security reports on Kalligator, a bug bounty plat
 
 Kalligator is a bug bounty platform. A hacker (`researcher` in the API) submits a report on a program. An AI triage agent tries to reproduce it and can ask questions. The Kalligator team (`founder` in the API) makes the final decision and approves the reward.
 
-You act for one hacker through the hacker API. Full docs: https://doc.kalligator.com/llms.txt. Add `.md` to any docs URL to get Markdown.
+You act for one hacker through the hacker API. Full docs: https://docs.kalligator.com/llms.txt. Add `.md` to any docs URL to get Markdown.
 
 ## Guardrails
 
@@ -118,9 +118,9 @@ Done when the report has a final status and you told the human the outcome.
 
 ## Reference
 
-- Report lifecycle and status rules: https://doc.kalligator.com/policies/report-lifecycle.md
-- Duplicates and priority time: https://doc.kalligator.com/policies/duplicates.md
-- Rules of engagement: https://doc.kalligator.com/policies/rules-of-engagement.md
-- All error codes: https://doc.kalligator.com/api-reference/errors.md
-- Limits: https://doc.kalligator.com/api-reference/limits.md
-- Retries and polling: https://doc.kalligator.com/api-reference/retries-and-polling.md
+- Report lifecycle and status rules: https://docs.kalligator.com/policies/report-lifecycle.md
+- Duplicates and priority time: https://docs.kalligator.com/policies/duplicates.md
+- Rules of engagement: https://docs.kalligator.com/policies/rules-of-engagement.md
+- All error codes: https://docs.kalligator.com/api-reference/errors.md
+- Limits: https://docs.kalligator.com/api-reference/limits.md
+- Retries and polling: https://docs.kalligator.com/api-reference/retries-and-polling.md

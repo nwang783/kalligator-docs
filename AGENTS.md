@@ -3,7 +3,7 @@
 ## About this project
 
 - This repository contains the Mintlify documentation site for Kalligator, the bug bounty platform at https://kalligator.com.
-- The site is published at https://doc.kalligator.com. A push to `main` deploys it.
+- The site is published at https://docs.kalligator.com. A push to `main` deploys it.
 - Kalligator source material lives in `~/Projects/kalligator`. The API contract is `platform/docs/api-contract.md`. The domain language is `CONTEXT.md`. The visual design is `DESIGN.md`.
 - Pages use MDX with YAML frontmatter. Site configuration lives in `docs.json`.
 - Endpoint pages come from `api-reference/openapi.json`. Change reader text in `api-reference/overlay.json`, then run `python3 scripts/sync_openapi.py`.

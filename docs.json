@@ -41,6 +41,10 @@
     "dark": "/logo/dark.svg",
     "href": "https://kalligator.com"
   },
+  "banner": {
+    "content": "**Private preview.** Kalligator is in early beta and is not generally available. Features, limits, and the API can change without notice.",
+    "dismissible": false
+  },
   "navigation": {
     "tabs": [
       {
@@ -49,11 +53,19 @@
         "groups": [
           {
             "group": "Get started",
-            "pages": ["index", "quickstart", "how-kalligator-works"]
+            "pages": [
+              "index",
+              "quickstart",
+              "how-kalligator-works"
+            ]
           },
           {
             "group": "Your account",
-            "pages": ["account/create-account", "account/payouts", "account/api-keys"]
+            "pages": [
+              "account/create-account",
+              "account/payouts",
+              "account/api-keys"
+            ]
           },
           {
             "group": "Reports",
@@ -92,7 +104,10 @@
           {
             "group": "Programs",
             "openapi": "api-reference/openapi.json",
-            "pages": ["GET /api/programs", "GET /api/programs/{program_id}"]
+            "pages": [
+              "GET /api/programs",
+              "GET /api/programs/{program_id}"
+            ]
           },
           {
             "group": "Reports",
@@ -136,7 +151,11 @@
           {
             "group": "API keys",
             "openapi": "api-reference/openapi.json",
-            "pages": ["GET /api/keys", "POST /api/keys", "DELETE /api/keys/{key_id}"]
+            "pages": [
+              "GET /api/keys",
+              "POST /api/keys",
+              "DELETE /api/keys/{key_id}"
+            ]
           }
         ]
       },
@@ -146,7 +165,11 @@
         "groups": [
           {
             "group": "Use Kalligator with an agent",
-            "pages": ["agents/overview", "agents/skill", "agents/end-to-end-example"]
+            "pages": [
+              "agents/overview",
+              "agents/skill",
+              "agents/end-to-end-example"
+            ]
           }
         ]
       }
@@ -157,7 +180,11 @@
       "display": "interactive"
     },
     "examples": {
-      "languages": ["curl", "python", "javascript"]
+      "languages": [
+        "curl",
+        "python",
+        "javascript"
+      ]
     }
   },
   "navbar": {
@@ -174,7 +201,17 @@
     }
   },
   "contextual": {
-    "options": ["copy", "view", "claude", "chatgpt", "mcp", "add-mcp", "cursor", "vscode", "download-spec"]
+    "options": [
+      "copy",
+      "view",
+      "claude",
+      "chatgpt",
+      "mcp",
+      "add-mcp",
+      "cursor",
+      "vscode",
+      "download-spec"
+    ]
   },
   "footer": {
     "socials": {
@@ -184,17 +221,35 @@
       {
         "header": "Kalligator",
         "items": [
-          { "label": "Programs", "href": "https://kalligator.com/programs" },
-          { "label": "For hackers", "href": "https://kalligator.com/hackers" },
-          { "label": "Contact", "href": "mailto:nathan@kalligator.com" }
+          {
+            "label": "Programs",
+            "href": "https://kalligator.com/programs"
+          },
+          {
+            "label": "For hackers",
+            "href": "https://kalligator.com/hackers"
+          },
+          {
+            "label": "Contact",
+            "href": "mailto:nathan@kalligator.com"
+          }
         ]
       },
       {
         "header": "For agents",
         "items": [
-          { "label": "skill.md", "href": "https://doc.kalligator.com/skill.md" },
-          { "label": "llms.txt", "href": "https://doc.kalligator.com/llms.txt" },
-          { "label": "OpenAPI", "href": "https://kalligator.com/api/openapi.json" }
+          {
+            "label": "skill.md",
+            "href": "https://docs.kalligator.com/skill.md"
+          },
+          {
+            "label": "llms.txt",
+            "href": "https://docs.kalligator.com/llms.txt"
+          },
+          {
+            "label": "OpenAPI",
+            "href": "https://kalligator.com/api/openapi.json"
+          }
         ]
       }
     ]
