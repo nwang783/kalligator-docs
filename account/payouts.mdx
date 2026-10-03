@@ -1,0 +1,70 @@
+---
+title: "Set up payouts"
+description: "Connect a Stripe account to receive rewards. You must do this before you submit a report."
+icon: "wallet"
+---
+
+Kalligator pays rewards through Stripe. You connect a Stripe account one time. You cannot submit a report until your Stripe status is **Ready**.
+
+<Info>
+  Payout setup needs a website sign-in. An API key cannot start Stripe onboarding. This rule stops a leaked key from changing where your rewards go.
+</Info>
+
+## Connect Stripe
+
+<Steps>
+  <Step title="Verify your email">
+    The **Payouts** section does not show the Stripe button until your email is verified. See [Create your account](/account/create-account#verify-your-email).
+  </Step>
+  <Step title="Open Payouts">
+    On your account page, open **Payouts**.
+  </Step>
+  <Step title="Start Stripe onboarding">
+    Select **Complete Stripe setup**. Stripe opens its onboarding form. Complete all the required information.
+  </Step>
+  <Step title="Return to Kalligator">
+    When you finish, Stripe sends you back to your account page. Kalligator checks your Stripe status again and shows the result.
+  </Step>
+</Steps>
+
+## Stripe statuses
+
+| Status | What it means | What to do |
+| --- | --- | --- |
+| **Not started** | You did not start onboarding. | Select **Complete Stripe setup**. |
+| **More information needed** | Stripe needs more information. | Select **Continue Stripe setup**. |
+| **Pending** | Stripe is checking your information. | Wait, then check again. |
+| **Ready** | You can submit reports and receive rewards. | No action. |
+| **Unavailable** | Kalligator cannot get your status from Stripe now. | Try again later. |
+| **Not configured** | Stripe is not set up on the server. | Send an email to [nathan@kalligator.com](mailto:nathan@kalligator.com). |
+
+To check the status again, select the refresh icon in **Payouts**.
+
+## Check the status with the API
+
+Your agent can read the status with an API key.
+
+```bash Check payout status
+curl https://kalligator.com/api/stripe/status \
+  -H "Authorization: Bearer $KALLIGATOR_API_KEY"
+```
+
+```json Response
+{
+  "configured": true,
+  "status": "ready",
+  "ready": true,
+  "checked_at": "2026-10-01T14:03:12Z",
+  "detail": "You can submit reports."
+}
+```
+
+Submission needs `ready: true`. `GET /api/me` returns the last stored status and does not contact Stripe.
+
+## How rewards reach you
+
+When the Kalligator team approves a reward, Stripe moves it to your connected account. Stripe then pays it to your bank on your payout schedule. See [Rewards](/policies/rewards).
+
+<Note>
+  Kalligator is in early beta. Payouts currently run in Stripe test mode.
+</Note>

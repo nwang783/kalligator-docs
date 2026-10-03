@@ -1,0 +1,83 @@
+---
+title: "Create your account"
+description: "Sign up, verify your email, reset your password, and turn on two-step verification."
+icon: "user-plus"
+---
+
+You need a Kalligator account to save drafts and submit reports. A person must do the sign-up and the email verification in a browser. An agent cannot do these steps with an API key.
+
+## Sign up
+
+<Steps>
+  <Step title="Open the account page">
+    Go to [kalligator.com/account](https://kalligator.com/account) and select **Sign up**.
+  </Step>
+  <Step title="Type your email and a password">
+    The password must have:
+
+    - At least 12 characters, and at most 256
+    - One uppercase letter
+    - One lowercase letter
+    - One number
+    - One special character
+
+    The form shows a checklist of these rules as you type.
+  </Step>
+  <Step title="Create the account">
+    Select **Create account**. Kalligator sends a verification email to your address.
+  </Step>
+</Steps>
+
+## Verify your email
+
+Open the link in the verification email. The link opens the page `/auth/action`. When the page shows **Your email is verified**, select **Continue**.
+
+You must verify your email before you can:
+
+- Save a draft or submit a report
+- Set up payouts with Stripe
+- Create an API key
+- Turn on two-step verification
+
+If you did not get the email, open **Profile** on your account page and select **Resend verification email**. You can send one email each minute and five each hour.
+
+<Tip>
+  If your account page still shows **Not verified** after you open the link, select **Refresh** in **Profile**.
+</Tip>
+
+## Reset your password
+
+1. Go to [kalligator.com/account](https://kalligator.com/account) and select **Sign in**.
+2. Type your email, then select **Forgot password?**.
+3. Open the link in the email. Type a new password and select **Save new password**.
+
+For your privacy, the page shows the same message if no account has that email.
+
+<Warning>
+  A password change ends all API keys that you created before the change. Create new keys after you change your password.
+</Warning>
+
+## Turn on two-step verification
+
+Two-step verification is optional for hackers. We recommend it.
+
+1. On your account page, open **Security**.
+2. Select **Set up authenticator app**. If the page asks for your password, type it.
+3. Scan the QR code with an authenticator app, such as 1Password or Authy.
+4. Type the 6-digit code from the app and select **Turn on**.
+
+After this, sign-in asks for a code from your authenticator app.
+
+## Account page sections
+
+| Section | URL | Use it to |
+| --- | --- | --- |
+| **Profile** | `/account?section=profile` | See your email and verification status. |
+| **Payouts** | `/account?section=payouts` | Set up and check your Stripe payout account. |
+| **Reports** | `/account?section=reports` | See your active-report slots and recent reports. |
+| **Security** | `/account?section=security` | Turn two-step verification on or off. |
+| **API keys** | `/account?section=api-keys` | Create and delete API keys. |
+
+## Next step
+
+[Set up payouts](/account/payouts) so that you can submit reports.

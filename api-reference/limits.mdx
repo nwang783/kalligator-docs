@@ -1,0 +1,71 @@
+---
+title: "Limits"
+description: "Rate limits, request sizes, field lengths, and counts in the Kalligator API."
+icon: "gauge"
+---
+
+## Rate limits
+
+| Limit | Value |
+| --- | --- |
+| Signed-in requests | 120 each minute for each account. All your keys and sessions share this limit. |
+| Failed authentication | 120 each minute for each client IP address |
+| Program routes | 120 each minute for each client IP address |
+| Verification email | One each minute and five each hour for each account |
+| Password reset | Five each minute and 30 each hour for each client IP address |
+| Stripe onboarding | Five each minute |
+
+A rejected request also counts in the current window. A `429 rate_limited` response has a `Retry-After` header. Wait that number of seconds before you try again.
+
+## Request sizes and times
+
+| Limit | Value |
+| --- | --- |
+| JSON body | 256 KiB |
+| File upload | 10 MiB |
+| Time to send a JSON body | 15 seconds |
+| Time to send a file | 120 seconds |
+
+## Reports
+
+| Limit | Value |
+| --- | --- |
+| Active reports (`triaging`, `needs_info`, `paused`) | 5 |
+| `title` | 180 characters |
+| `asset` | 1,000 characters |
+| `description` | 30,000 characters |
+| `cvss_vector` | 100 characters, a valid CVSS 3.1 base vector |
+| Reports on each list page | 1 to 100, default 50 |
+
+Whitespace in Markdown fields counts toward the limit.
+
+## Files
+
+| Limit | Value |
+| --- | --- |
+| Size of each file | 10 MiB, not empty |
+| Files on a draft | 10 |
+| Message files that wait to be sent | 10 |
+| Files on a report in total | 40 |
+| File name | 180 characters |
+
+## Messages
+
+| Limit | Value |
+| --- | --- |
+| `body` | 12,000 characters |
+| `files` | 10 file IDs |
+
+## API keys
+
+| Limit | Value |
+| --- | --- |
+| Keys for each account | 100 |
+| `name` | 1 to 80 characters |
+| `expires_in_days` | 1 to 365, default 90, or `null` for no expiry |
+
+## Programs
+
+| Limit | Value |
+| --- | --- |
+| Programs on each list page | 1 to 50, default 12 |

@@ -1,0 +1,62 @@
+---
+title: "Find a program"
+description: "Browse programs, read the scope and rules, and see private programs that invite you."
+icon: "search"
+---
+
+A program tells you what you can test, what is out of scope, and how much each severity pays. Read the full program before you test.
+
+## Browse programs
+
+Go to [kalligator.com/programs](https://kalligator.com/programs). Use the filters to narrow the list:
+
+| Filter | Options |
+| --- | --- |
+| **Assets** | Web app, API, Mobile, Source code, Cloud, Hardware / IoT, Other |
+| **Top reward** | Under $1k, $1k–$5k, $5k–$10k, $10k+ |
+| **Updated** | Any time, Last 7 days, Last 30 days |
+| **Intake** | Open, Paused, Closed |
+
+The list shows only programs with open intake by default.
+
+## Read a program
+
+Each program page has these sections. Read all of them before you test.
+
+| Section | What it tells you |
+| --- | --- |
+| **Overview** | What the program covers. |
+| **Scope** | The assets and hosts that you can test. |
+| **Exclusions** | Assets and flaw types that are out of scope. |
+| **Testing rules** | How you must test, for example rate limits and test accounts. |
+| **Rewards** | The reward in US dollars for each confirmed severity: low, medium, high, and critical. |
+| **Eligibility** | Who can receive a reward. |
+| **Disclosure** | When and how you can publish details of a flaw. |
+
+<Warning>
+  If an asset is not in **Scope**, do not test it. Kalligator does not accept reports on assets outside the scope.
+</Warning>
+
+## Intake and paused programs
+
+- **Open**: the program accepts new reports.
+- **Paused** or **Closed**: the program does not accept new reports. **Start a report** is disabled.
+
+A program can also pause new reports when its reward pool is low. The page then shows a notice that new reports are paused until the reward pool is topped up. Reports that you already submitted continue as normal.
+
+## Private programs
+
+A private program has a **Private** label. Only hackers that Kalligator invited by verified email can see it. For all other people, the program does not exist: the page and the API return "not found".
+
+To see private programs that invite you, sign in. With the API, send your key to `GET /api/programs`.
+
+## Find programs with the API
+
+```bash List open web programs
+curl "https://kalligator.com/api/programs?intake=open&asset=web,api" \
+  -H "Authorization: Bearer $KALLIGATOR_API_KEY"
+```
+
+The `Authorization` header is optional for program routes. Without it, you see only public programs. To read the full policy of one program, use [`GET /api/programs/{program_id}`](/api-reference/programs/get-a-program).
+
+The policy fields `scope`, `exclusions`, `rules`, `eligibility`, and `disclosure` are Markdown.

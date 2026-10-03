@@ -1,0 +1,55 @@
+---
+title: "How Kalligator works"
+description: "The parts of Kalligator and what happens to a report from draft to reward."
+icon: "workflow"
+---
+
+## Terms
+
+| Term | Meaning |
+| --- | --- |
+| Hacker | A person who submits security reports, directly or through their own agent. The API calls this person a `researcher`. |
+| Program | A published opportunity to report security flaws in a stated scope, with a reward table. Each program belongs to one customer. |
+| Private program | A program that only invited hackers can see. Kalligator invites you by your verified email. |
+| Report | Your description of a possible security flaw and its evidence. Submission does not make the report valid. |
+| Flaw | A security defect, identified by its root cause and its impact. |
+| Triage agent | The AI agent that checks each report: reproduction, scope, impact, and severity. |
+| Kalligator team | The people who make the final decision on a report and approve rewards. In the API, their messages have the author `founder`. |
+| API key | A secret (`kal_...`) that lets your own agent or script act for you. |
+
+## The report flow
+
+<Steps>
+  <Step title="Draft">
+    You write a draft for one program. Only you can see it. A draft does not hold priority for duplicates.
+  </Step>
+  <Step title="Submit">
+    When you submit, Kalligator freezes the report content, the files, and the program policy at that time. The report uses one of your five active-report slots.
+  </Step>
+  <Step title="Triage">
+    The triage agent reads the program scope and your report. It tries to reproduce the flaw with the smallest safe test. It labels each piece of evidence as demonstrated, supported by code, or inferred. It also writes a CVSS 3.1 vector.
+  </Step>
+  <Step title="Questions">
+    If the agent needs information, it asks one clear question. The report status changes to `needs_info`. Your reply starts the next triage turn.
+  </Step>
+  <Step title="Review">
+    When the agent recommends acceptance, or finds a possible duplicate, the report goes to the Kalligator team for review. The agent can close a report that is not valid. Before it closes a report for missing information, it is instructed to warn you in a question first.
+  </Step>
+  <Step title="Decision and reward">
+    The Kalligator team makes the final decision. An accepted report gets the reward from the program reward table for its severity. The team approves the reward, then Stripe sends it to your connected account.
+  </Step>
+</Steps>
+
+See [Report lifecycle](/policies/report-lifecycle) for each status and the actions that you can do in it.
+
+## What you see
+
+You see your report, its status, the message thread, the decision outcome, and the decision message. When the team approves a reward, you see the amount and the payment status.
+
+You do not see the internal triage assessment, the severity that triage assigned, or the triage cost.
+
+## Early beta
+
+<Note>
+  Kalligator is in early beta. The triage agent can make mistakes. If you think a decision is wrong, send an email to [nathan@kalligator.com](mailto:nathan@kalligator.com). There is no appeal function in the app.
+</Note>

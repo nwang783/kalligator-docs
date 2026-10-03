@@ -1,0 +1,364 @@
+{
+  "info": {
+    "title": "Kalligator API",
+    "description": "The Kalligator API gives you all the hacker functions of the website. Use it to find programs, write and submit reports, upload evidence, and reply to the triage agent.\n\nSend `Authorization: Bearer kal_...` with an API key from the **API keys** section of your account page. The full guide is at https://doc.kalligator.com/api-reference/introduction."
+  },
+  "servers": [
+    {
+      "url": "https://kalligator.com",
+      "description": "Production"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Programs",
+      "description": "Published programs that accept reports."
+    },
+    {
+      "name": "Reports",
+      "description": "Drafts, submission, and withdrawal of your reports."
+    },
+    {
+      "name": "Files",
+      "description": "Evidence files that you attach to a report or to a message."
+    },
+    {
+      "name": "Messages",
+      "description": "The thread between you, the triage agent, and the Kalligator team."
+    },
+    {
+      "name": "Account",
+      "description": "Your account status and payout setup."
+    },
+    {
+      "name": "API keys",
+      "description": "Keys that let your agent or script act for you. Key management needs a website sign-in."
+    },
+    {
+      "name": "Account emails",
+      "description": "Email verification and password reset."
+    }
+  ],
+  "operations": {
+    "GET /api/programs": {
+      "summary": "List programs",
+      "security": [
+        {},
+        {
+          "HTTPBearer": []
+        }
+      ],
+      "description": "Returns published programs, newest update first. Each filter takes comma-separated values. The API ignores unknown values.\n\nThe `Authorization` header is optional. Send it to include the private programs that invite your verified email. An invalid or empty header gives `401`.\n\n`counts[filter][option]` tells you how many programs that option shows, given the other filters.",
+      "parameters": {
+        "asset": {
+          "description": "Asset types. Any of `web`, `api`, `mobile`, `source_code`, `cloud`, `hardware`, `other`."
+        },
+        "reward": {
+          "description": "Top reward band. Any of `under_1k`, `1k_5k`, `5k_10k`, `over_10k`."
+        },
+        "updated": {
+          "description": "Last update. One of `any`, `7d`, `30d`."
+        },
+        "intake": {
+          "description": "Intake state. Any of `open`, `paused`, `closed`."
+        },
+        "limit": {
+          "description": "Programs on each page, from 1 to 50."
+        },
+        "page": {
+          "description": "Page number, from 1. A page after the end gives the last page."
+        }
+      }
+    },
+    "GET /api/programs/{program_id}": {
+      "summary": "Get a program",
+      "security": [
+        {},
+        {
+          "HTTPBearer": []
+        }
+      ],
+      "description": "Returns one program with its policy text in Markdown: description, scope, exclusions, rules, eligibility, and disclosure terms. Read all of these before you test.\n\nAn unpublished program gives `404`. A private program gives `404` unless your token belongs to an invited hacker.",
+      "parameters": {
+        "program_id": {
+          "description": "The program ID, for example `acme-web`."
+        }
+      }
+    },
+    "GET /api/reports": {
+      "summary": "List reports",
+      "description": "Returns your reports, newest update first.\n\nTo get the next page, send `next_cursor` as `cursor`. `next_cursor` is `null` on the last page.\n\nTo poll for changes, send the newest `updated_at` that you saw as `updated_since`. Use the `Z` form that the API returns. Read every page, then keep the newest `updated_at` of the first page for the next poll. `updated_at` changes on each status change, each draft save, and each file upload.",
+      "parameters": {
+        "limit": {
+          "description": "Reports on each page, from 1 to 100."
+        },
+        "cursor": {
+          "description": "The `next_cursor` value from the previous page."
+        },
+        "updated_since": {
+          "description": "Return only reports changed after this time. Include a time zone, for example `2026-10-01T12:00:00Z`."
+        }
+      }
+    },
+    "GET /api/reports/{report_id}": {
+      "summary": "Get a report",
+      "description": "Returns one of your reports. A report that is not yours gives `404`.",
+      "parameters": {
+        "report_id": {
+          "description": "The report UUID."
+        }
+      }
+    },
+    "PUT /api/reports/{report_id}": {
+      "summary": "Create or save a draft",
+      "description": "Creates a draft or saves changes to a draft. You choose the report ID: make a new UUIDv4. Because the ID is yours, a retry never makes a duplicate report.\n\nSend `revision: 0` for a new draft. After that, send the `revision` from the last response. If the draft changed in a different session, the API returns `409 revision_conflict` with the stored report in `current`.\n\nYou can only edit a report in `draft` status. You cannot change `program_id` after you create the draft. Your email must be verified.",
+      "parameters": {
+        "report_id": {
+          "description": "A UUIDv4 that you make for a new draft, or the ID of your draft."
+        }
+      }
+    },
+    "POST /api/reports/{report_id}/submit": {
+      "summary": "Submit a report",
+      "description": "Submits a draft and starts triage. The report moves to `triaging`. Kalligator freezes the report content, its ready files, and the program policy at this time.\n\nSubmission needs all of these:\n\n- A verified email.\n- A Stripe payout account with status `ready`.\n- A title, an asset, and a description with text below the template headings.\n- No unfinished file uploads.\n- A program with open intake and a reward pool that is not paused.\n- Fewer than five active reports.\n\nTo submit again with the same `revision` is safe. The API returns the submitted report and does not start a second triage.",
+      "parameters": {
+        "report_id": {
+          "description": "The ID of your draft."
+        }
+      }
+    },
+    "POST /api/reports/{report_id}/withdraw": {
+      "summary": "Withdraw a report",
+      "description": "Withdraws a submitted report before the final decision. A queued triage turn stops. If the report holds an active-report slot (`triaging`, `needs_info`, or `paused`), it gives the slot back.\n\nYou cannot withdraw after a final decision (`409 invalid_state`). To withdraw a withdrawn report again is safe and makes no change.",
+      "parameters": {
+        "report_id": {
+          "description": "The ID of your report."
+        }
+      }
+    },
+    "PUT /api/reports/{report_id}/files/{file_id}": {
+      "summary": "Upload a file",
+      "description": "Uploads the raw bytes of one evidence file. Send the file MIME type as `Content-Type`, or `application/octet-stream`. The response is the updated report: use its new `revision` for your next change.\n\nOn a draft, the file attaches to the report. Before a final decision, the file waits as message evidence until you send it with a message.\n\nLimits: 10 files on a draft, 10 MiB for each file, 10 pending message files, and 40 files on a report in total. To upload the same bytes with the same file ID again is safe.",
+      "parameters": {
+        "report_id": {
+          "description": "The report ID."
+        },
+        "file_id": {
+          "description": "A UUIDv4 that you make for this file."
+        },
+        "name": {
+          "description": "The file name, for example `request.txt`. No folder separators or control characters."
+        },
+        "revision": {
+          "description": "The current report `revision`."
+        }
+      }
+    },
+    "GET /api/reports/{report_id}/files/{file_id}": {
+      "summary": "Download a file",
+      "description": "Downloads one ready file from your report as `application/octet-stream`.",
+      "parameters": {
+        "report_id": {
+          "description": "The report ID."
+        },
+        "file_id": {
+          "description": "The file ID."
+        }
+      }
+    },
+    "DELETE /api/reports/{report_id}/files/{file_id}": {
+      "summary": "Remove a file",
+      "description": "Removes a file from a draft, or a pending message file that you did not send. First remove all Markdown references to the file (`409 file_referenced`). Submitted files and sent files do not change.",
+      "parameters": {
+        "report_id": {
+          "description": "The report ID."
+        },
+        "file_id": {
+          "description": "The file ID."
+        },
+        "revision": {
+          "description": "The current report `revision`."
+        }
+      }
+    },
+    "GET /api/reports/{report_id}/messages": {
+      "summary": "List messages",
+      "description": "Returns the report thread, oldest first. `author` is `agent` for the triage agent, `researcher` for you, and `founder` for the Kalligator team.",
+      "parameters": {
+        "report_id": {
+          "description": "The report ID."
+        }
+      }
+    },
+    "POST /api/reports/{report_id}/messages": {
+      "summary": "Send a message",
+      "description": "Sends a message on the report thread before the final decision. Send a `body`, at least one file ID in `files`, or both.\n\nIf the report status is `needs_info`, your message is a reply. The report moves to `triaging` and the triage agent starts a new turn. In other statuses, the message does not change the status. The agent reads it on its next turn.\n\nEach file must be a message file that you uploaded and that is `ready`. Your email must be verified.",
+      "parameters": {
+        "report_id": {
+          "description": "The report ID."
+        }
+      }
+    },
+    "GET /api/me": {
+      "summary": "Get your account",
+      "description": "Returns your email, verification state, active-report count, and the last stored Stripe status. This call does not contact Stripe. For a fresh Stripe check, use `GET /api/stripe/status`."
+    },
+    "GET /api/stripe/status": {
+      "summary": "Check payout status",
+      "description": "Gets a fresh status of your Stripe payout account. Submission needs `ready: true`. If Stripe has a problem, the status is `unavailable` with HTTP `200`. Your email must be verified."
+    },
+    "POST /api/stripe/onboarding": {
+      "summary": "Start payout setup",
+      "description": "Returns a single-use Stripe onboarding link. Open it in a browser to set up or update your payout account.\n\nThis route needs a website sign-in. An API key gives `403 session_required`, so a leaked key cannot change where your rewards go. Use the **Payouts** section of your account page."
+    },
+    "POST /api/auth/verification-email": {
+      "summary": "Send a verification email",
+      "tags": [
+        "Account emails"
+      ],
+      "description": "Sends an email with a verification link to the account email. If the email is already verified, the API sends nothing and returns `already_verified: true`.\n\nLimits: one email each minute and five each hour."
+    },
+    "POST /api/auth/password-reset": {
+      "summary": "Request a password reset",
+      "tags": [
+        "Account emails"
+      ],
+      "description": "Sends a password reset link if an account has this email. The response is the same when no account exists.\n\nLimits: five requests each minute and 30 each hour from one address. One email each minute and five each hour to one email address."
+    },
+    "GET /api/keys": {
+      "summary": "List API keys",
+      "description": "Returns your API keys, newest first. The secret key does not show again after creation. This route needs a website sign-in."
+    },
+    "POST /api/keys": {
+      "summary": "Create an API key",
+      "description": "Creates an API key. The response is the only time that you see the secret `key`. Store it in a secret manager.\n\nA `write` key can use all hacker routes. A `read` key can only use `GET`. Expiry is from 1 to 365 days (default 90), or `null` for no expiry. The limit is 100 keys. This route needs a website sign-in."
+    },
+    "DELETE /api/keys/{key_id}": {
+      "summary": "Delete an API key",
+      "description": "Deletes an API key. The key stops working immediately. This route needs a website sign-in.",
+      "parameters": {
+        "key_id": {
+          "description": "The key `id` from the key list."
+        }
+      }
+    }
+  },
+  "schemas": {
+    "ProgramSummary": {
+      "properties": {
+        "intake": "`open` accepts reports. `paused` and `closed` do not.",
+        "demo": "`true` for a demonstration program with test data.",
+        "rewards": "Reward in US dollars for each severity: `low`, `medium`, `high`, `critical`.",
+        "policy_version": "The version of the program policy and reward table. A report keeps the version that it was submitted under.",
+        "private": "`true` if only invited hackers can see the program.",
+        "pool_paused": "`true` if new submissions are paused because the reward pool is below the largest reward."
+      }
+    },
+    "Program": {
+      "properties": {
+        "intake": "`open` accepts reports. `paused` and `closed` do not.",
+        "rewards": "Reward in US dollars for each severity: `low`, `medium`, `high`, `critical`.",
+        "policy_version": "The version of the program policy and reward table.",
+        "private": "`true` if only invited hackers can see the program.",
+        "pool_paused": "`true` if new submissions are paused because the reward pool is below the largest reward.",
+        "scope": "Markdown. The assets and hosts that you are permitted to test.",
+        "exclusions": "Markdown. Assets and flaw types that are out of scope.",
+        "rules": "Markdown. Rules of engagement for testing.",
+        "eligibility": "Markdown. Who can receive a reward.",
+        "disclosure": "Markdown. When and how you can publish details."
+      }
+    },
+    "ReportInput": {
+      "properties": {
+        "program_id": "The program for the report. You cannot change it after you create the draft.",
+        "title": "A short title, at most 180 characters.",
+        "asset": "The affected asset, for example a URL, host, app, or repository. At most 1000 characters.",
+        "description": "Markdown, at most 30000 characters. Use the headings for steps to reproduce, expected behavior, actual behavior, and security impact.",
+        "cvss_vector": "Optional. Your CVSS 3.1 base vector, for example `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N`. Send an empty string for none.",
+        "revision": "`0` for a new draft. Otherwise the current `revision` of the report."
+      }
+    },
+    "SubmitInput": {
+      "properties": {
+        "revision": "The current `revision` of the draft."
+      }
+    },
+    "Report": {
+      "properties": {
+        "status": "The report status. See the report lifecycle guide.",
+        "display_status": "The status text that the website shows.",
+        "revision": "Increases when you save the draft, upload or remove a file, submit, or withdraw. Send the latest value with your next change.",
+        "attachments": "Files on the report, by file ID.",
+        "submission": "The frozen copy of the report, files, and program policy at submission. `null` for a draft.",
+        "decision": "The final decision and an optional message. `null` until a decision.",
+        "payout": "Your reward payment. `null` until the Kalligator team approves the reward."
+      }
+    },
+    "ReportSummary": {
+      "properties": {
+        "status": "The report status. See the report lifecycle guide.",
+        "display_status": "The status text that the website shows."
+      }
+    },
+    "Attachment": {
+      "properties": {
+        "state": "`ready` files can be referenced and downloaded. `uploading` and `failed` files block submission.",
+        "sha256": "The SHA-256 hash of the file bytes.",
+        "reply": "`true` for a message file.",
+        "message_id": "The message that sent the file. `null` while the file waits."
+      }
+    },
+    "MessageInput": {
+      "properties": {
+        "body": "Markdown, at most 12000 characters.",
+        "files": "Up to 10 IDs of ready message files."
+      }
+    },
+    "KeyInput": {
+      "properties": {
+        "name": "A label for the key, 1 to 80 characters. For example, the name of your agent.",
+        "scope": "`write` (default) or `read`. A `read` key can only use `GET`.",
+        "expires_in_days": "Days until the key expires, from 1 to 365. Default 90. Send `null` for no expiry."
+      }
+    },
+    "NewApiKey": {
+      "properties": {
+        "key": "The secret key. It starts with `kal_`. This is the only time that the API shows it."
+      }
+    },
+    "ApiKey": {
+      "properties": {
+        "id": "The key ID. Use it to delete the key. It is not the secret.",
+        "hint": "The first eight characters of the key.",
+        "last_used_at": "The last use. Updates at most once each minute."
+      }
+    },
+    "Me": {
+      "properties": {
+        "active_reports": "Reports that hold a slot: `triaging`, `needs_info`, or `paused`.",
+        "active_limit": "The maximum number of active reports."
+      }
+    },
+    "StripeStatus": {
+      "properties": {
+        "status": "The payout account status. Only `ready` permits submission.",
+        "ready": "`true` only when the server check passes.",
+        "detail": "A short sentence that tells you the next step."
+      }
+    },
+    "Payout": {
+      "properties": {
+        "status": "`approving`, then `transferred`, then `received`. `payout_failed` if the bank payout failed.",
+        "amount_cents": "The reward in US cents."
+      }
+    },
+    "Error": {
+      "description": "Every error has this body. Make decisions on `code`, not on `detail`.",
+      "properties": {
+        "detail": "A message for a person.",
+        "code": "A stable `snake_case` error code.",
+        "current": "Only on `409 revision_conflict`: the stored report."
+      }
+    }
+  }
+}

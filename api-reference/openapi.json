@@ -1,0 +1,2966 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Kalligator API",
+    "description": "The Kalligator API gives you all the hacker functions of the website. Use it to find programs, write and submit reports, upload evidence, and reply to the triage agent.\n\nSend `Authorization: Bearer kal_...` with an API key from the **API keys** section of your account page. The full guide is at https://doc.kalligator.com/api-reference/introduction.",
+    "version": "1"
+  },
+  "paths": {
+    "/api/programs": {
+      "get": {
+        "tags": [
+          "Programs"
+        ],
+        "summary": "List programs",
+        "description": "Returns published programs, newest update first. Each filter takes comma-separated values. The API ignores unknown values.\n\nThe `Authorization` header is optional. Send it to include the private programs that invite your verified email. An invalid or empty header gives `401`.\n\n`counts[filter][option]` tells you how many programs that option shows, given the other filters.",
+        "operationId": "list_programs_api_programs_get",
+        "security": [
+          {},
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "asset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Asset"
+            },
+            "description": "Asset types. Any of `web`, `api`, `mobile`, `source_code`, `cloud`, `hardware`, `other`."
+          },
+          {
+            "name": "reward",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reward"
+            },
+            "description": "Top reward band. Any of `under_1k`, `1k_5k`, `5k_10k`, `over_10k`."
+          },
+          {
+            "name": "updated",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Updated"
+            },
+            "description": "Last update. One of `any`, `7d`, `30d`."
+          },
+          {
+            "name": "intake",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Intake"
+            },
+            "description": "Intake state. Any of `open`, `paused`, `closed`."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 12,
+              "title": "Limit"
+            },
+            "description": "Programs on each page, from 1 to 50."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "Page number, from 1. A page after the end gives the last page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgramPage"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/programs/{program_id}": {
+      "get": {
+        "tags": [
+          "Programs"
+        ],
+        "summary": "Get a program",
+        "operationId": "read_program_api_programs__program_id__get",
+        "security": [
+          {},
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "program_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Program Id"
+            },
+            "description": "The program ID, for example `acme-web`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Program"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Returns one program with its policy text in Markdown: description, scope, exclusions, rules, eligibility, and disclosure terms. Read all of these before you test.\n\nAn unpublished program gives `404`. A private program gives `404` unless your token belongs to an invited hacker."
+      }
+    },
+    "/api/reports": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "List reports",
+        "description": "Returns your reports, newest update first.\n\nTo get the next page, send `next_cursor` as `cursor`. `next_cursor` is `null` on the last page.\n\nTo poll for changes, send the newest `updated_at` that you saw as `updated_since`. Use the `Z` form that the API returns. Read every page, then keep the newest `updated_at` of the first page for the next poll. `updated_at` changes on each status change, each draft save, and each file upload.",
+        "operationId": "list_reports_api_reports_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Reports on each page, from 1 to 100."
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid4"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            },
+            "description": "The `next_cursor` value from the previous page."
+          },
+          {
+            "name": "updated_since",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Updated Since"
+            },
+            "description": "Return only reports changed after this time. Include a time zone, for example `2026-10-01T12:00:00Z`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportPage"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/{report_id}": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Get a report",
+        "operationId": "read_report_api_reports__report_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Report Id"
+            },
+            "description": "The report UUID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Returns one of your reports. A report that is not yours gives `404`."
+      },
+      "put": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Create or save a draft",
+        "operationId": "save_report_api_reports__report_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Report Id"
+            },
+            "description": "A UUIDv4 that you make for a new draft, or the ID of your draft."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Creates a draft or saves changes to a draft. You choose the report ID: make a new UUIDv4. Because the ID is yours, a retry never makes a duplicate report.\n\nSend `revision: 0` for a new draft. After that, send the `revision` from the last response. If the draft changed in a different session, the API returns `409 revision_conflict` with the stored report in `current`.\n\nYou can only edit a report in `draft` status. You cannot change `program_id` after you create the draft. Your email must be verified."
+      }
+    },
+    "/api/reports/{report_id}/submit": {
+      "post": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Submit a report",
+        "operationId": "submit_report_api_reports__report_id__submit_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Report Id"
+            },
+            "description": "The ID of your draft."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Submits a draft and starts triage. The report moves to `triaging`. Kalligator freezes the report content, its ready files, and the program policy at this time.\n\nSubmission needs all of these:\n\n- A verified email.\n- A Stripe payout account with status `ready`.\n- A title, an asset, and a description with text below the template headings.\n- No unfinished file uploads.\n- A program with open intake and a reward pool that is not paused.\n- Fewer than five active reports.\n\nTo submit again with the same `revision` is safe. The API returns the submitted report and does not start a second triage."
+      }
+    },
+    "/api/reports/{report_id}/withdraw": {
+      "post": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Withdraw a report",
+        "operationId": "withdraw_report_api_reports__report_id__withdraw_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Report Id"
+            },
+            "description": "The ID of your report."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Withdraws a submitted report before the final decision. A queued triage turn stops. If the report holds an active-report slot (`triaging`, `needs_info`, or `paused`), it gives the slot back.\n\nYou cannot withdraw after a final decision (`409 invalid_state`). To withdraw a withdrawn report again is safe and makes no change."
+      }
+    },
+    "/api/reports/{report_id}/files/{file_id}": {
+      "put": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Upload a file",
+        "operationId": "upload_file_api_reports__report_id__files__file_id__put",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Report Id"
+            },
+            "description": "The report ID."
+          },
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "File Id"
+            },
+            "description": "A UUIDv4 that you make for this file."
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180,
+              "title": "Name"
+            },
+            "description": "The file name, for example `request.txt`. No folder separators or control characters."
+          },
+          {
+            "name": "revision",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "title": "Revision"
+            },
+            "description": "The current report `revision`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "description": "The raw file bytes. Send the file type as `Content-Type`.",
+          "content": {
+            "*/*": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        },
+        "description": "Uploads the raw bytes of one evidence file. Send the file MIME type as `Content-Type`, or `application/octet-stream`. The response is the updated report: use its new `revision` for your next change.\n\nOn a draft, the file attaches to the report. Before a final decision, the file waits as message evidence until you send it with a message.\n\nLimits: 10 files on a draft, 10 MiB for each file, 10 pending message files, and 40 files on a report in total. To upload the same bytes with the same file ID again is safe."
+      },
+      "get": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Download a file",
+        "operationId": "download_file_api_reports__report_id__files__file_id__get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Report Id"
+            },
+            "description": "The report ID."
+          },
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "File Id"
+            },
+            "description": "The file ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The file bytes",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "application/octet-stream": {}
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Downloads one ready file from your report as `application/octet-stream`."
+      },
+      "delete": {
+        "tags": [
+          "Files"
+        ],
+        "summary": "Remove a file",
+        "operationId": "remove_file_api_reports__report_id__files__file_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Report Id"
+            },
+            "description": "The report ID."
+          },
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "File Id"
+            },
+            "description": "The file ID."
+          },
+          {
+            "name": "revision",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "title": "Revision"
+            },
+            "description": "The current report `revision`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Removes a file from a draft, or a pending message file that you did not send. First remove all Markdown references to the file (`409 file_referenced`). Submitted files and sent files do not change."
+      }
+    },
+    "/api/me": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Get your account",
+        "operationId": "me_api_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "description": "Returns your email, verification state, active-report count, and the last stored Stripe status. This call does not contact Stripe. For a fresh Stripe check, use `GET /api/stripe/status`."
+      }
+    },
+    "/api/stripe/status": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Check payout status",
+        "operationId": "status_api_stripe_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StripeStatus"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "description": "Gets a fresh status of your Stripe payout account. Submission needs `ready: true`. If Stripe has a problem, the status is `unavailable` with HTTP `200`. Your email must be verified."
+      }
+    },
+    "/api/stripe/onboarding": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Start payout setup",
+        "operationId": "onboarding_api_stripe_onboarding_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingLink"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "description": "Returns a single-use Stripe onboarding link. Open it in a browser to set up or update your payout account.\n\nThis route needs a website sign-in. An API key gives `403 session_required`, so a leaked key cannot change where your rewards go. Use the **Payouts** section of your account page."
+      }
+    },
+    "/api/auth/verification-email": {
+      "post": {
+        "summary": "Send a verification email",
+        "operationId": "verification_email_api_auth_verification_email_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "tags": [
+          "Account emails"
+        ],
+        "description": "Sends an email with a verification link to the account email. If the email is already verified, the API sends nothing and returns `already_verified: true`.\n\nLimits: one email each minute and five each hour."
+      }
+    },
+    "/api/auth/password-reset": {
+      "post": {
+        "summary": "Request a password reset",
+        "description": "Sends a password reset link if an account has this email. The response is the same when no account exists.\n\nLimits: five requests each minute and 30 each hour from one address. One email each minute and five each hour to one email address.",
+        "operationId": "password_reset_api_auth_password_reset_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Account emails"
+        ]
+      }
+    },
+    "/api/reports/{report_id}/messages": {
+      "get": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "List messages",
+        "operationId": "list_messages_api_reports__report_id__messages_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Report Id"
+            },
+            "description": "The report ID."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageList"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "description": "Returns the report thread, oldest first. `author` is `agent` for the triage agent, `researcher` for you, and `founder` for the Kalligator team."
+      },
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Send a message",
+        "description": "Sends a message on the report thread before the final decision. Send a `body`, at least one file ID in `files`, or both.\n\nIf the report status is `needs_info`, your message is a reply. The report moves to `triaging` and the triage agent starts a new turn. In other statuses, the message does not change the status. The agent reads it on its next turn.\n\nEach file must be a message file that you uploaded and that is `ready`. Your email must be verified.",
+        "operationId": "reply_api_reports__report_id__messages_post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Report Id"
+            },
+            "description": "The report ID."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Report"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/keys": {
+      "get": {
+        "tags": [
+          "API keys"
+        ],
+        "summary": "List API keys",
+        "description": "Returns your API keys, newest first. The secret key does not show again after creation. This route needs a website sign-in.",
+        "operationId": "list_keys_api_keys_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyList"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "API keys"
+        ],
+        "summary": "Create an API key",
+        "description": "Creates an API key. The response is the only time that you see the secret `key`. Store it in a secret manager.\n\nA `write` key can use all hacker routes. A `read` key can only use `GET`. Expiry is from 1 to 365 days (default 90), or `null` for no expiry. The limit is 100 keys. This route needs a website sign-in.",
+        "operationId": "create_key_api_keys_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KeyInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewApiKey"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/keys/{key_id}": {
+      "delete": {
+        "tags": [
+          "API keys"
+        ],
+        "summary": "Delete an API key",
+        "description": "Deletes an API key. The key stops working immediately. This route needs a website sign-in.",
+        "operationId": "delete_key_api_keys__key_id__delete",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "key_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Key Id"
+            },
+            "description": "The key `id` from the key list."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKeyList"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "`{detail, code}`; see the error codes in the API description",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "5XX": {
+            "description": "Retry after `Retry-After` seconds when it is set",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiKey": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "The key ID. Use it to delete the key. It is not the secret."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "read",
+              "write"
+            ],
+            "title": "Scope"
+          },
+          "hint": {
+            "type": "string",
+            "title": "Hint",
+            "description": "The first eight characters of the key."
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At",
+            "description": "The last use. Updates at most once each minute."
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "scope",
+          "hint",
+          "created_at",
+          "last_used_at",
+          "expires_at"
+        ],
+        "title": "ApiKey"
+      },
+      "ApiKeyList": {
+        "properties": {
+          "keys": {
+            "items": {
+              "$ref": "#/components/schemas/ApiKey"
+            },
+            "type": "array",
+            "title": "Keys"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "keys"
+        ],
+        "title": "ApiKeyList"
+      },
+      "Attachment": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256",
+            "description": "The SHA-256 hash of the file bytes."
+          },
+          "storage_path": {
+            "type": "string",
+            "title": "Storage Path"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "uploading",
+              "ready",
+              "failed",
+              "deleting"
+            ],
+            "title": "State",
+            "description": "`ready` files can be referenced and downloaded. `uploading` and `failed` files block submission."
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "uploaded_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Uploaded At"
+          },
+          "generation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generation"
+          },
+          "reply": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reply",
+            "description": "`true` for a message file."
+          },
+          "message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message Id",
+            "description": "The message that sent the file. `null` while the file waits."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "size",
+          "content_type",
+          "sha256",
+          "storage_path",
+          "state",
+          "started_at"
+        ],
+        "title": "Attachment"
+      },
+      "Content": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "asset": {
+            "type": "string",
+            "title": "Asset"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "cvss_vector": {
+            "type": "string",
+            "title": "Cvss Vector",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "asset",
+          "description"
+        ],
+        "title": "Content"
+      },
+      "Decision": {
+        "properties": {
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "rejected",
+              "duplicate",
+              "insufficient_info"
+            ],
+            "title": "Outcome"
+          },
+          "at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "outcome",
+          "at",
+          "message"
+        ],
+        "title": "Decision"
+      },
+      "Error": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "description": "A message for a person."
+          },
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "A stable `snake_case` error code."
+          },
+          "current": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Report"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only on `409 revision_conflict`: the stored report."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "detail",
+          "code"
+        ],
+        "title": "Error",
+        "description": "Every error has this body. Make decisions on `code`, not on `detail`."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "KeyInput": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Name",
+            "description": "A label for the key, 1 to 80 characters. For example, the name of your agent."
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "read",
+              "write"
+            ],
+            "title": "Scope",
+            "default": "write",
+            "description": "`write` (default) or `read`. A `read` key can only use `GET`."
+          },
+          "expires_in_days": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 365.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires In Days",
+            "default": 90,
+            "description": "Days until the key expires, from 1 to 365. Default 90. Send `null` for no expiry."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "KeyInput"
+      },
+      "Me": {
+        "properties": {
+          "uid": {
+            "type": "string",
+            "title": "Uid"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "email_verified": {
+            "type": "boolean",
+            "title": "Email Verified"
+          },
+          "active_reports": {
+            "type": "integer",
+            "title": "Active Reports",
+            "description": "Reports that hold a slot: `triaging`, `needs_info`, or `paused`."
+          },
+          "active_limit": {
+            "type": "integer",
+            "title": "Active Limit",
+            "description": "The maximum number of active reports."
+          },
+          "stripe": {
+            "$ref": "#/components/schemas/StripeStatus"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "uid",
+          "email",
+          "email_verified",
+          "active_reports",
+          "active_limit",
+          "stripe"
+        ],
+        "title": "Me"
+      },
+      "Message": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "author": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "researcher",
+              "founder"
+            ],
+            "title": "Author"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At"
+          },
+          "attachments": {
+            "items": {
+              "$ref": "#/components/schemas/MessageFile"
+            },
+            "type": "array",
+            "title": "Attachments"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "author",
+          "body",
+          "at",
+          "attachments"
+        ],
+        "title": "Message"
+      },
+      "MessageFile": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "size",
+          "content_type"
+        ],
+        "title": "MessageFile"
+      },
+      "MessageInput": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "maxLength": 12000,
+            "title": "Body",
+            "default": "",
+            "description": "Markdown, at most 12000 characters."
+          },
+          "files": {
+            "items": {
+              "type": "string",
+              "format": "uuid4"
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Files",
+            "description": "Up to 10 IDs of ready message files."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "MessageInput"
+      },
+      "MessageList": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/Message"
+            },
+            "type": "array",
+            "title": "Messages"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "messages"
+        ],
+        "title": "MessageList"
+      },
+      "NewApiKey": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "read",
+              "write"
+            ],
+            "title": "Scope"
+          },
+          "hint": {
+            "type": "string",
+            "title": "Hint"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "description": "The secret key. It starts with `kal_`. This is the only time that the API shows it."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "scope",
+          "hint",
+          "created_at",
+          "last_used_at",
+          "expires_at",
+          "key"
+        ],
+        "title": "NewApiKey"
+      },
+      "OnboardingLink": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "OnboardingLink"
+      },
+      "Payout": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "approving",
+              "transferred",
+              "received",
+              "payout_failed"
+            ],
+            "title": "Status",
+            "description": "`approving`, then `transferred`, then `received`. `payout_failed` if the bank payout failed."
+          },
+          "amount_cents": {
+            "type": "integer",
+            "title": "Amount Cents",
+            "description": "The reward in US cents."
+          },
+          "approved_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved At"
+          },
+          "transferred_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transferred At"
+          },
+          "received_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Received At"
+          },
+          "payout_failed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payout Failed At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "amount_cents",
+          "approved_at",
+          "transferred_at",
+          "received_at",
+          "payout_failed_at"
+        ],
+        "title": "Payout",
+        "description": "The researcher's view of an approved reward; null until the founder approves it."
+      },
+      "Program": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "customer_name": {
+            "type": "string",
+            "title": "Customer Name"
+          },
+          "intake": {
+            "type": "string",
+            "enum": [
+              "open",
+              "paused",
+              "closed"
+            ],
+            "title": "Intake",
+            "description": "`open` accepts reports. `paused` and `closed` do not."
+          },
+          "demo": {
+            "type": "boolean",
+            "title": "Demo"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "asset_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Asset Types"
+          },
+          "reward_range": {
+            "$ref": "#/components/schemas/RewardRange"
+          },
+          "rewards": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ]
+            },
+            "type": "object",
+            "title": "Rewards",
+            "description": "Reward in US dollars for each severity: `low`, `medium`, `high`, `critical`."
+          },
+          "policy_version": {
+            "type": "integer",
+            "title": "Policy Version",
+            "description": "The version of the program policy and reward table."
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "private": {
+            "type": "boolean",
+            "title": "Private",
+            "description": "`true` if only invited hackers can see the program."
+          },
+          "pool_paused": {
+            "type": "boolean",
+            "title": "Pool Paused",
+            "description": "`true` if new submissions are paused because the reward pool is below the largest reward."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope",
+            "description": "Markdown. The assets and hosts that you are permitted to test."
+          },
+          "exclusions": {
+            "type": "string",
+            "title": "Exclusions",
+            "description": "Markdown. Assets and flaw types that are out of scope."
+          },
+          "rules": {
+            "type": "string",
+            "title": "Rules",
+            "description": "Markdown. Rules of engagement for testing."
+          },
+          "eligibility": {
+            "type": "string",
+            "title": "Eligibility",
+            "description": "Markdown. Who can receive a reward."
+          },
+          "disclosure": {
+            "type": "string",
+            "title": "Disclosure",
+            "description": "Markdown. When and how you can publish details."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "customer_name",
+          "intake",
+          "demo",
+          "summary",
+          "asset_types",
+          "reward_range",
+          "rewards",
+          "policy_version",
+          "updated_at",
+          "private",
+          "pool_paused",
+          "description",
+          "scope",
+          "exclusions",
+          "rules",
+          "eligibility",
+          "disclosure"
+        ],
+        "title": "Program"
+      },
+      "ProgramPage": {
+        "properties": {
+          "programs": {
+            "items": {
+              "$ref": "#/components/schemas/ProgramSummary"
+            },
+            "type": "array",
+            "title": "Programs"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "pages": {
+            "type": "integer",
+            "title": "Pages"
+          },
+          "counts": {
+            "additionalProperties": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "type": "object"
+            },
+            "type": "object",
+            "title": "Counts"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "programs",
+          "total",
+          "page",
+          "pages",
+          "counts"
+        ],
+        "title": "ProgramPage"
+      },
+      "ProgramSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "customer_name": {
+            "type": "string",
+            "title": "Customer Name"
+          },
+          "intake": {
+            "type": "string",
+            "enum": [
+              "open",
+              "paused",
+              "closed"
+            ],
+            "title": "Intake",
+            "description": "`open` accepts reports. `paused` and `closed` do not."
+          },
+          "demo": {
+            "type": "boolean",
+            "title": "Demo",
+            "description": "`true` for a demonstration program with test data."
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "asset_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Asset Types"
+          },
+          "reward_range": {
+            "$ref": "#/components/schemas/RewardRange"
+          },
+          "rewards": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ]
+            },
+            "type": "object",
+            "title": "Rewards",
+            "description": "Reward in US dollars for each severity: `low`, `medium`, `high`, `critical`."
+          },
+          "policy_version": {
+            "type": "integer",
+            "title": "Policy Version",
+            "description": "The version of the program policy and reward table. A report keeps the version that it was submitted under."
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "private": {
+            "type": "boolean",
+            "title": "Private",
+            "description": "`true` if only invited hackers can see the program."
+          },
+          "pool_paused": {
+            "type": "boolean",
+            "title": "Pool Paused",
+            "description": "`true` if new submissions are paused because the reward pool is below the largest reward."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "customer_name",
+          "intake",
+          "demo",
+          "summary",
+          "asset_types",
+          "reward_range",
+          "rewards",
+          "policy_version",
+          "updated_at",
+          "private",
+          "pool_paused"
+        ],
+        "title": "ProgramSummary"
+      },
+      "Report": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "program_id": {
+            "type": "string",
+            "title": "Program Id"
+          },
+          "program_name": {
+            "type": "string",
+            "title": "Program Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "triaging",
+              "needs_info",
+              "paused",
+              "human_review",
+              "accepted",
+              "rejected",
+              "duplicate",
+              "insufficient_info",
+              "withdrawn"
+            ],
+            "title": "Status",
+            "description": "The report status. See the report lifecycle guide."
+          },
+          "display_status": {
+            "type": "string",
+            "title": "Display Status",
+            "description": "The status text that the website shows."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision",
+            "description": "Increases when you save the draft, upload or remove a file, submit, or withdraw. Send the latest value with your next change."
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted At"
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawn At"
+          },
+          "asset": {
+            "type": "string",
+            "title": "Asset"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "cvss_vector": {
+            "type": "string",
+            "title": "Cvss Vector"
+          },
+          "attachments": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Attachment"
+            },
+            "type": "object",
+            "title": "Attachments",
+            "description": "Files on the report, by file ID."
+          },
+          "submission": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Submission"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The frozen copy of the report, files, and program policy at submission. `null` for a draft."
+          },
+          "decision": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Decision"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The final decision and an optional message. `null` until a decision."
+          },
+          "payout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Payout"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Your reward payment. `null` until the Kalligator team approves the reward."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "program_id",
+          "program_name",
+          "status",
+          "display_status",
+          "title",
+          "revision",
+          "created_at",
+          "updated_at",
+          "submitted_at",
+          "withdrawn_at",
+          "asset",
+          "description",
+          "cvss_vector",
+          "attachments",
+          "submission",
+          "decision"
+        ],
+        "title": "Report"
+      },
+      "ReportInput": {
+        "properties": {
+          "program_id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{1,80}$",
+            "title": "Program Id",
+            "description": "The program for the report. You cannot change it after you create the draft."
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 180,
+            "title": "Title",
+            "description": "A short title, at most 180 characters."
+          },
+          "asset": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Asset",
+            "description": "The affected asset, for example a URL, host, app, or repository. At most 1000 characters."
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 30000,
+            "title": "Description",
+            "description": "Markdown, at most 30000 characters. Use the headings for steps to reproduce, expected behavior, actual behavior, and security impact."
+          },
+          "cvss_vector": {
+            "type": "string",
+            "maxLength": 100,
+            "title": "Cvss Vector",
+            "default": "",
+            "description": "Optional. Your CVSS 3.1 base vector, for example `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N`. Send an empty string for none."
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Revision",
+            "description": "`0` for a new draft. Otherwise the current `revision` of the report."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "program_id",
+          "title",
+          "asset",
+          "description",
+          "revision"
+        ],
+        "title": "ReportInput"
+      },
+      "ReportPage": {
+        "properties": {
+          "reports": {
+            "items": {
+              "$ref": "#/components/schemas/ReportSummary"
+            },
+            "type": "array",
+            "title": "Reports"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "reports",
+          "next_cursor"
+        ],
+        "title": "ReportPage"
+      },
+      "ReportSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "program_id": {
+            "type": "string",
+            "title": "Program Id"
+          },
+          "program_name": {
+            "type": "string",
+            "title": "Program Name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "triaging",
+              "needs_info",
+              "paused",
+              "human_review",
+              "accepted",
+              "rejected",
+              "duplicate",
+              "insufficient_info",
+              "withdrawn"
+            ],
+            "title": "Status",
+            "description": "The report status. See the report lifecycle guide."
+          },
+          "display_status": {
+            "type": "string",
+            "title": "Display Status",
+            "description": "The status text that the website shows."
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted At"
+          },
+          "withdrawn_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Withdrawn At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "program_id",
+          "program_name",
+          "status",
+          "display_status",
+          "title",
+          "revision",
+          "created_at",
+          "updated_at",
+          "submitted_at",
+          "withdrawn_at"
+        ],
+        "title": "ReportSummary"
+      },
+      "ResetInput": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+            "title": "Email"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "ResetInput"
+      },
+      "RewardRange": {
+        "properties": {
+          "min": {
+            "type": "integer",
+            "title": "Min"
+          },
+          "max": {
+            "type": "integer",
+            "title": "Max"
+          },
+          "currency": {
+            "type": "string",
+            "const": "USD",
+            "title": "Currency"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "min",
+          "max",
+          "currency"
+        ],
+        "title": "RewardRange"
+      },
+      "StripeStatus": {
+        "properties": {
+          "configured": {
+            "type": "boolean",
+            "title": "Configured"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "unconfigured",
+              "not_started",
+              "needs_information",
+              "pending",
+              "ready",
+              "unavailable"
+            ],
+            "title": "Status",
+            "description": "The payout account status. Only `ready` permits submission."
+          },
+          "ready": {
+            "type": "boolean",
+            "title": "Ready",
+            "description": "`true` only when the server check passes."
+          },
+          "checked_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked At"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "description": "A short sentence that tells you the next step."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "configured",
+          "status",
+          "ready",
+          "checked_at",
+          "detail"
+        ],
+        "title": "StripeStatus"
+      },
+      "Submission": {
+        "properties": {
+          "submitted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted At"
+          },
+          "attachments": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Attachment"
+            },
+            "type": "object",
+            "title": "Attachments"
+          },
+          "content": {
+            "$ref": "#/components/schemas/Content"
+          },
+          "program": {
+            "$ref": "#/components/schemas/SubmittedProgram"
+          },
+          "stripe": {
+            "$ref": "#/components/schemas/SubmittedStripe"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "submitted_at",
+          "attachments",
+          "content",
+          "program",
+          "stripe"
+        ],
+        "title": "Submission"
+      },
+      "SubmitInput": {
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Revision",
+            "description": "The current `revision` of the draft."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "revision"
+        ],
+        "title": "SubmitInput"
+      },
+      "SubmittedProgram": {
+        "properties": {
+          "policy_version": {
+            "type": "integer",
+            "title": "Policy Version"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "scope": {
+            "type": "string",
+            "title": "Scope"
+          },
+          "exclusions": {
+            "type": "string",
+            "title": "Exclusions"
+          },
+          "rules": {
+            "type": "string",
+            "title": "Rules"
+          },
+          "eligibility": {
+            "type": "string",
+            "title": "Eligibility"
+          },
+          "disclosure": {
+            "type": "string",
+            "title": "Disclosure"
+          },
+          "rewards": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ]
+            },
+            "type": "object",
+            "title": "Rewards"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "policy_version",
+          "name",
+          "scope",
+          "exclusions",
+          "rules",
+          "eligibility",
+          "disclosure",
+          "rewards"
+        ],
+        "title": "SubmittedProgram"
+      },
+      "SubmittedStripe": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "checked_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "status",
+          "checked_at"
+        ],
+        "title": "SubmittedStripe"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "description": "A Firebase ID token, or a Kalligator API key (`kal_…`).",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://kalligator.com",
+      "description": "Production"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Programs",
+      "description": "Published programs that accept reports."
+    },
+    {
+      "name": "Reports",
+      "description": "Drafts, submission, and withdrawal of your reports."
+    },
+    {
+      "name": "Files",
+      "description": "Evidence files that you attach to a report or to a message."
+    },
+    {
+      "name": "Messages",
+      "description": "The thread between you, the triage agent, and the Kalligator team."
+    },
+    {
+      "name": "Account",
+      "description": "Your account status and payout setup."
+    },
+    {
+      "name": "API keys",
+      "description": "Keys that let your agent or script act for you. Key management needs a website sign-in."
+    },
+    {
+      "name": "Account emails",
+      "description": "Email verification and password reset."
+    }
+  ]
+}

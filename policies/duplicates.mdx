@@ -1,0 +1,55 @@
+---
+title: "Duplicates"
+description: "How Kalligator decides which report of a flaw wins, and what priority time means."
+icon: "copy"
+---
+
+When two reports describe the same flaw, the earliest valid report wins. The later report is a duplicate.
+
+## What is one flaw
+
+A flaw is a security defect with one root cause and one impact.
+
+- One defect that affects several routes is one flaw.
+- The same root cause with a materially new impact is a separate flaw.
+
+## Priority time
+
+Priority time is the time when a report first established its flaw. It is one of these:
+
+- The submission time, if the report made the flaw reproducible.
+- The time of your reply that first made the flaw reproducible.
+
+The server records the time. The earliest priority time wins, strictly. One second earlier is enough.
+
+These reports never hold priority:
+
+- Drafts
+- Withdrawn reports
+- Rejected reports
+- Reports closed for insufficient information
+- Duplicate reports
+
+<Tip>
+  Submit when your report is complete enough to reproduce the flaw. A draft holds no priority. An incomplete report gets priority only when your reply makes the flaw reproducible.
+</Tip>
+
+## Valid earlier reports only
+
+A report is a duplicate only of a valid earlier report or a known issue. If the earlier report is rejected or withdrawn, your later report can win.
+
+## Known issues
+
+A known issue is a flaw that the customer knew about before your report, with the date that they learned about it. A known issue can make your report a duplicate. A known issue never earns a reward.
+
+## Who decides
+
+The triage agent does not see the reports of other hackers. A separate check finds possible duplicates and sends the report to the Kalligator team for review. Only the Kalligator team confirms a duplicate.
+
+## The duplicate message
+
+The decision message gives the reason and a date. It does not show the title, the text, or the author of the other report.
+
+If your report is a duplicate of your own earlier report, add the new details to the earlier report.
+
+To appeal, send an email to [nathan@kalligator.com](mailto:nathan@kalligator.com).

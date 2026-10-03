@@ -1,0 +1,42 @@
+---
+title: "Rules of engagement"
+description: "The rules that apply to all testing and all reports on Kalligator, by you or by your agent."
+icon: "shield-check"
+---
+
+These rules apply to all programs. Each program can add more rules in its **Testing rules** section. If a program rule is stricter, obey the program rule.
+
+## Authorization
+
+- Test only the assets in the program **Scope**. A program gives you permission to test only those assets.
+- Do not test assets in **Exclusions**, or assets that the program does not name.
+- Obey the program **Testing rules**, for example rate limits and test accounts.
+- Use the test accounts and data that the program gives. Do not get access to the data of real people.
+- Stop a test if it can have an effect on a real person, on production data, or on the availability of a service.
+
+<Warning>
+  You are responsible for all actions of your agent. If your agent tests or submits for you, give it these rules and the program scope. Do not let it send traffic to hosts that the scope does not name.
+</Warning>
+
+## Reports
+
+- Put one flaw in each report. Submit a separate report for each flaw.
+- Give steps that the triage agent can follow to reproduce the flaw.
+- Write only true information. Mark what you showed, and what you think but did not show.
+- Do not put secrets, live credentials of real people, or personal data in a report. If you must show that you got access to data, show the minimum and mask it.
+
+## Disclosure
+
+A closed report does not give you permission to publish details of the flaw. A reward does not give you permission either. You can publish details only under the terms in the program **Disclosure** section.
+
+A closed report does not mean that the customer fixed the flaw.
+
+## Accounts and keys
+
+- Keep your password and API keys secret.
+- Do not share an account. Each hacker uses a personal account.
+- Delete an API key immediately if you think someone else has it.
+
+## Questions
+
+Send an email to [nathan@kalligator.com](mailto:nathan@kalligator.com) if a rule is not clear before you test.

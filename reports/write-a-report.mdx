@@ -1,0 +1,125 @@
+---
+title: "Write a report"
+description: "Write a clear draft with steps to reproduce, attach evidence, and add an optional CVSS estimate."
+icon: "file-pen"
+---
+
+A good report lets the triage agent reproduce the flaw on the first turn. Write one flaw in each report.
+
+## Start a draft
+
+On a program page, select **Start a report**. The draft page opens. Only you can see a draft.
+
+If the button shows **Sign in to report** or **Verify email to report**, complete that step first.
+
+## Fields
+
+| Field | Limit | Required to submit |
+| --- | --- | --- |
+| **Title** | 180 characters | Yes |
+| **Affected asset** | 1,000 characters | Yes |
+| **Description** | 30,000 characters, Markdown | Yes |
+| **Your severity estimate** | A CVSS 3.1 base vector | No |
+
+### Title
+
+Write the flaw type and the location. For example: `Stored XSS in project name on the dashboard`.
+
+### Affected asset
+
+Write the exact URL, host, app, API, or repository. The asset must be in the program scope.
+
+### Description
+
+The description starts from a template with four headings:
+
+```markdown Description template
+## Steps to reproduce
+
+1. 
+
+## Expected behavior
+
+## Actual behavior
+
+## Security impact
+```
+
+Write text under the headings. You cannot submit the template with no text.
+
+- **Steps to reproduce**: number each step. Include the exact requests, parameters, and accounts. Use the test accounts that the program gives, if it gives them.
+- **Expected behavior**: what the system must do.
+- **Actual behavior**: what the system does.
+- **Security impact**: what an attacker can do, to which data or users, and under which conditions.
+
+<Tip>
+  Put one flaw in each report. A flaw is one root cause with one impact. If you found more than one flaw, submit a separate report for each. The triage agent checks only the first flaw in a report.
+</Tip>
+
+## Attach evidence
+
+Attach screenshots, request logs, scripts, or videos to the draft.
+
+- Select the paperclip on **Description**, or drop files on the field.
+- Kalligator saves the draft and puts a Markdown link to the file at the cursor, for example `[request.txt](/reports/<report_id>/files/<file_id>)`.
+- Each file is private. Only you, the triage agent, and the Kalligator team can open it.
+
+| Limit | Value |
+| --- | --- |
+| Files on a draft | 10 |
+| Size of each file | 10 MB |
+| Empty files | Not permitted |
+
+<Note>
+  The triage agent cannot open Office documents. Send a PDF or plain text instead.
+</Note>
+
+Files that you attach but do not link are still sent with the report. Remove the files that you do not need. To remove a file, first remove its link from the text.
+
+## Add a severity estimate
+
+**Your severity estimate** is optional. Select a value for each of the eight CVSS 3.1 base metrics. The page shows the score, the severity, and the vector.
+
+Triage treats your vector as unverified. The agent scores the report from its own evidence. The severity that triage assigns is not shown to you.
+
+| Score | Severity |
+| --- | --- |
+| 0.0 | None |
+| 0.1–3.9 | Low |
+| 4.0–6.9 | Medium |
+| 7.0–8.9 | High |
+| 9.0–10.0 | Critical |
+
+## Save the draft
+
+Select **Save draft**. Each save increments the draft **Revision**.
+
+If you edit the same draft in two sessions, the page shows **This draft changed in another session**. Select **Reload their version**, or select **Copy my text** to keep your changes.
+
+<Info>
+  A draft does not hold priority. If another hacker submits the same flaw first, their report can win. See [Duplicates](/policies/duplicates).
+</Info>
+
+## Write a draft with the API
+
+You choose the report ID. Make a new UUIDv4 and send `revision: 0`.
+
+```bash Create a draft
+curl -X PUT "https://kalligator.com/api/reports/$REPORT_ID" \
+  -H "Authorization: Bearer $KALLIGATOR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "program_id": "acme-web",
+    "title": "Stored XSS in project name on the dashboard",
+    "asset": "https://app.example.com/dashboard",
+    "description": "## Steps to reproduce\n\n1. Sign in as the test user.\n2. ...\n\n## Expected behavior\n\n...\n\n## Actual behavior\n\n...\n\n## Security impact\n\n...",
+    "cvss_vector": "",
+    "revision": 0
+  }'
+```
+
+The response is the report with `revision: 1`. Send that revision with your next change. See [`PUT /api/reports/{report_id}`](/api-reference/reports/create-or-save-a-draft) and [`PUT /api/reports/{report_id}/files/{file_id}`](/api-reference/files/upload-a-file).
+
+## Next step
+
+[Submit the report](/reports/submit-a-report).

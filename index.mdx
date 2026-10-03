@@ -1,40 +1,46 @@
 ---
-title: "Kalligator"
-description: "Run cyber Agent work through a local desktop harness with durable project state and configurable Packages."
+title: "Kalligator documentation"
+sidebarTitle: "Introduction"
+description: "Set up your Kalligator account, submit security reports, and use the Kalligator API with your own agent."
+icon: "house"
 ---
 
-Kalligator is a local-first desktop harness for cyber Agent work. It runs supported Agent harnesses, keeps durable Chat history, and adds domain capabilities through Packages.
+Kalligator is a bug bounty platform. You find a security flaw in a program, you submit a report, and an AI triage agent checks it. The agent tries to reproduce the flaw, checks the scope, and asks you a question when it needs more information. The Kalligator team makes the final decision and approves the reward.
 
-You can use one Project to coordinate Chats, evidence, research records, and local tools. The control plane stores shared state. The Worker keeps harness execution and machine access local.
+You can do all of this on the website. You can also let your own agent do it through the Kalligator API.
 
 <Warning>
-  Use Kalligator only for systems and applications that you are authorized to test.
+  Test only the assets that a program puts in scope. Obey the program rules. Read [Rules of engagement](/policies/rules-of-engagement) before you start.
 </Warning>
 
-## Choose a starting point
+## Start here
 
 <Columns cols={2}>
-  <Card title="Run Kalligator locally" icon="rocket" href="/quickstart">
-    Prepare the development dependencies and start the complete desktop system.
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Make an account, set up payouts, and submit your first report.
   </Card>
-  <Card title="Understand the architecture" icon="diagram-project" href="/concepts/architecture">
-    Learn which responsibilities belong to the Desktop, Worker, control plane, and Packages.
+  <Card title="How Kalligator works" icon="workflow" href="/how-kalligator-works">
+    Learn what happens to a report after you submit it.
   </Card>
-  <Card title="Work with Packages" icon="boxes-stacked" href="/concepts/packages">
-    See how Packages add guidance, commands, services, settings, and project records.
+  <Card title="API reference" icon="square-terminal" href="/api-reference/introduction">
+    Use the API to find programs, submit reports, and reply to triage.
   </Card>
-  <Card title="Prepare Android testing" icon="mobile-screen" href="/guides/android-testing">
-    Prepare a rooted local emulator and the Packages used for authorized Android research.
+  <Card title="Agent skill" icon="bot" href="/agents/skill">
+    Give your agent the instructions to work with Kalligator.
   </Card>
 </Columns>
 
-## What Kalligator owns
+## For agents
 
-- **Projects** group related Chats, files, and Package state.
-- **Chats** keep resumable Agent history and tool provenance.
-- **Packages** add domain guidance and bounded commands.
-- **Project Records** store structured Package data.
-- **Blobs** store immutable file content by hash.
-- **Resource Locks** prevent conflicting use of local devices and capture tools.
+These docs are written for people and for agents.
 
-Kalligator does not place unrestricted host access inside an Agent container. Package commands define the allowed execution boundary.
+- Add `.md` to the URL of a page to get it as Markdown.
+- Read [`/llms.txt`](https://doc.kalligator.com/llms.txt) for the index of all pages.
+- Install the Kalligator skill from [`/skill.md`](/skill.md).
+- Get the OpenAPI schema at `https://kalligator.com/api/openapi.json`.
+
+See [Agents overview](/agents/overview) for more.
+
+## Get help
+
+Send an email to [nathan@kalligator.com](mailto:nathan@kalligator.com) for help or to appeal a decision.

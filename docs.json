@@ -1,55 +1,207 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
+  "theme": "maple",
   "name": "Kalligator",
-  "description": "Documentation for the Kalligator local cyber Agent harness.",
+  "description": "Kalligator connects security researchers with bug bounty programs. An AI triage agent checks each report. Use these docs to set up your account, submit reports, and use the Kalligator API with your own agent.",
   "colors": {
-    "primary": "#15803D",
-    "light": "#16A34A",
-    "dark": "#16A34A"
+    "primary": "#2f6f6e",
+    "light": "#75b6b5",
+    "dark": "#75b6b5"
+  },
+  "appearance": {
+    "default": "dark",
+    "strict": true
+  },
+  "background": {
+    "color": {
+      "light": "#ffffff",
+      "dark": "#101e1e"
+    }
+  },
+  "fonts": {
+    "family": "Poppins",
+    "heading": {
+      "family": "Poppins",
+      "weight": 400
+    },
+    "body": {
+      "family": "Poppins",
+      "weight": 400
+    }
+  },
+  "icons": {
+    "library": "lucide"
+  },
+  "styling": {
+    "codeblocks": "dark"
   },
   "favicon": "/favicon.svg",
   "logo": {
     "light": "/logo/light.svg",
     "dark": "/logo/dark.svg",
-    "href": "/"
+    "href": "https://kalligator.com"
   },
   "navigation": {
-    "groups": [
+    "tabs": [
       {
-        "group": "Get started",
-        "pages": ["index", "quickstart"]
+        "tab": "Guides",
+        "icon": "book-open",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": ["index", "quickstart", "how-kalligator-works"]
+          },
+          {
+            "group": "Your account",
+            "pages": ["account/create-account", "account/payouts", "account/api-keys"]
+          },
+          {
+            "group": "Reports",
+            "pages": [
+              "reports/find-programs",
+              "reports/write-a-report",
+              "reports/submit-a-report",
+              "reports/track-and-reply"
+            ]
+          },
+          {
+            "group": "Policies",
+            "pages": [
+              "policies/rules-of-engagement",
+              "policies/report-lifecycle",
+              "policies/duplicates",
+              "policies/rewards"
+            ]
+          }
+        ]
       },
       {
-        "group": "Core concepts",
-        "pages": ["concepts/architecture", "concepts/packages"]
+        "tab": "API reference",
+        "icon": "square-terminal",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api-reference/introduction",
+              "api-reference/authentication",
+              "api-reference/errors",
+              "api-reference/limits",
+              "api-reference/retries-and-polling"
+            ]
+          },
+          {
+            "group": "Programs",
+            "openapi": "api-reference/openapi.json",
+            "pages": ["GET /api/programs", "GET /api/programs/{program_id}"]
+          },
+          {
+            "group": "Reports",
+            "openapi": "api-reference/openapi.json",
+            "pages": [
+              "GET /api/reports",
+              "GET /api/reports/{report_id}",
+              "PUT /api/reports/{report_id}",
+              "POST /api/reports/{report_id}/submit",
+              "POST /api/reports/{report_id}/withdraw"
+            ]
+          },
+          {
+            "group": "Files",
+            "openapi": "api-reference/openapi.json",
+            "pages": [
+              "PUT /api/reports/{report_id}/files/{file_id}",
+              "GET /api/reports/{report_id}/files/{file_id}",
+              "DELETE /api/reports/{report_id}/files/{file_id}"
+            ]
+          },
+          {
+            "group": "Messages",
+            "openapi": "api-reference/openapi.json",
+            "pages": [
+              "GET /api/reports/{report_id}/messages",
+              "POST /api/reports/{report_id}/messages"
+            ]
+          },
+          {
+            "group": "Account",
+            "openapi": "api-reference/openapi.json",
+            "pages": [
+              "GET /api/me",
+              "GET /api/stripe/status",
+              "POST /api/stripe/onboarding",
+              "POST /api/auth/verification-email",
+              "POST /api/auth/password-reset"
+            ]
+          },
+          {
+            "group": "API keys",
+            "openapi": "api-reference/openapi.json",
+            "pages": ["GET /api/keys", "POST /api/keys", "DELETE /api/keys/{key_id}"]
+          }
+        ]
       },
       {
-        "group": "Guides",
-        "pages": ["guides/android-testing"]
+        "tab": "Agents",
+        "icon": "bot",
+        "groups": [
+          {
+            "group": "Use Kalligator with an agent",
+            "pages": ["agents/overview", "agents/skill", "agents/end-to-end-example"]
+          }
+        ]
       }
     ]
+  },
+  "api": {
+    "playground": {
+      "display": "interactive"
+    },
+    "examples": {
+      "languages": ["curl", "python", "javascript"]
+    }
   },
   "navbar": {
     "links": [
       {
-        "label": "GitHub",
-        "href": "https://github.com/nwang783/hacking-harness"
+        "label": "Programs",
+        "href": "https://kalligator.com/programs"
       }
     ],
     "primary": {
       "type": "button",
-      "label": "Quickstart",
-      "href": "/quickstart"
+      "label": "Sign in",
+      "href": "https://kalligator.com/account"
     }
   },
   "contextual": {
-    "options": ["copy", "view", "chatgpt", "claude", "mcp"]
+    "options": ["copy", "view", "claude", "chatgpt", "mcp", "add-mcp", "cursor", "vscode", "download-spec"]
   },
   "footer": {
     "socials": {
-      "website": "https://kalligator.com",
-      "github": "https://github.com/nwang783/hacking-harness"
+      "website": "https://kalligator.com"
+    },
+    "links": [
+      {
+        "header": "Kalligator",
+        "items": [
+          { "label": "Programs", "href": "https://kalligator.com/programs" },
+          { "label": "For hackers", "href": "https://kalligator.com/hackers" },
+          { "label": "Contact", "href": "mailto:nathan@kalligator.com" }
+        ]
+      },
+      {
+        "header": "For agents",
+        "items": [
+          { "label": "skill.md", "href": "https://doc.kalligator.com/skill.md" },
+          { "label": "llms.txt", "href": "https://doc.kalligator.com/llms.txt" },
+          { "label": "OpenAPI", "href": "https://kalligator.com/api/openapi.json" }
+        ]
+      }
+    ]
+  },
+  "seo": {
+    "metatags": {
+      "og:site_name": "Kalligator docs"
     }
   }
 }

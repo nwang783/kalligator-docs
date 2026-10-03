@@ -1,0 +1,62 @@
+/* Kalligator brand layer. Tokens match platform/web/src/app.css in the kalligator repo:
+ * a dark teal canvas, Poppins, teal for everything interactive, depth from surface steps. */
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root {
+  --k-teal: #75b6b5;
+  --k-mint: #0be291;
+  --k-coral: #f4706b;
+  --k-void: #101e1e;
+  --k-carbon: #1a1a1a;
+  --k-slate: #162929;
+  --k-graphite: #3b4949;
+  --k-fog: #a3b8b7;
+  --k-paper: #ffffff;
+  --k-control-border: #5f7474;
+}
+
+code, pre, kbd, samp {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace !important;
+}
+
+/* Headings: light weight, as on kalligator.com. */
+#content-area h1, #header h1 { font-weight: 300; letter-spacing: -0.01em; }
+#content-area h2, #content-area h3 { font-weight: 400; }
+
+::selection { background: var(--k-teal); color: var(--k-void); }
+:focus-visible { outline: 1px solid var(--k-teal); outline-offset: 3px; }
+
+/* Links: teal, underlined at half strength, full on hover. */
+#content-area a:not(.card):not([class*="card"]) {
+  color: var(--k-teal);
+  text-decoration-color: rgba(117, 182, 181, 0.5);
+  text-underline-offset: 4px;
+}
+#content-area a:not(.card):not([class*="card"]):hover { text-decoration-color: var(--k-teal); }
+
+/* Surfaces: slate cards with structural hairlines, no shadows. */
+.dark .card, .dark [class*="card"] {
+  background-color: var(--k-slate);
+  border-color: var(--k-graphite);
+  box-shadow: none;
+}
+.dark .card:hover { border-color: var(--k-teal); }
+
+/* Code blocks sit on carbon, as the terminal and code panels on the site do. */
+.dark .code-block, .dark pre { background-color: var(--k-carbon) !important; }
+
+/* Inline code: graphite chip. */
+.dark :not(pre) > code {
+  background-color: var(--k-slate);
+  border: 1px solid var(--k-graphite);
+  color: var(--k-paper);
+}
+
+/* Tables: slate header, hairline rows. */
+.dark #content-area table th { background-color: var(--k-slate); }
+.dark #content-area table th, .dark #content-area table td { border-color: var(--k-graphite); }
+
+/* Navbar sign-in button: pill outline, as on kalligator.com. */
+#topbar-cta-button a, #topbar-cta-button button {
+  border-radius: 9999px;
+}

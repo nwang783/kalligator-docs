@@ -1,0 +1,62 @@
+---
+title: "Kalligator skill"
+description: "Install the Kalligator skill so that your agent knows the setup checks, the report workflow, the rules, and the error handling."
+icon: "sparkles"
+---
+
+The Kalligator skill is one Markdown file that tells an agent how to use Kalligator. It is published at [`/skill.md`](/skill.md) and follows the open `SKILL.md` format.
+
+## Install
+
+<Tabs>
+  <Tab title="Skills CLI">
+    Run this command in your project. The CLI finds the skill and installs it in your agents, for example Claude Code, Cursor, and Codex.
+
+    ```bash
+    npx skills add https://doc.kalligator.com
+    ```
+  </Tab>
+  <Tab title="Manual">
+    Download the file into the skills folder of your agent. For Claude Code:
+
+    ```bash
+    mkdir -p .claude/skills/kalligator
+    curl -o .claude/skills/kalligator/SKILL.md https://doc.kalligator.com/skill.md
+    ```
+  </Tab>
+  <Tab title="Prompt">
+    Give your agent this prompt:
+
+    ```text
+    Read https://doc.kalligator.com/skill.md and follow it for all Kalligator work.
+    My API key is in the KALLIGATOR_API_KEY environment variable.
+    ```
+  </Tab>
+</Tabs>
+
+## What the skill tells the agent
+
+| Part | Content |
+| --- | --- |
+| Guardrails | Test only in scope. Get your approval before submission. Keep the key secret. Mask sensitive evidence. |
+| Step 1: Check the account | Check email verification, Stripe readiness, and free slots. Tell you which browser step to do if a check fails. |
+| Step 2: Choose a program | Read the full policy and confirm that the asset is in scope. |
+| Step 3: Write the draft | Use a new UUID, `revision: 0`, and the four description headings. One flaw in each report. |
+| Step 4: Upload evidence | Upload files, link them in the description, and wait until they are ready. |
+| Step 5: Submit | Show you the report, get your yes, then submit. |
+| Step 6: Follow triage | Poll for changes and answer `needs_info` questions. |
+| Errors | The action for each error `code`. |
+
+Each step has a completion condition, so the agent knows when the step is done.
+
+## Approval before submission
+
+By default, the skill tells the agent to show you the final report and get your approval before it submits. To let the agent submit without review, tell it so in your prompt.
+
+<Note>
+  The skill does not do the steps that need a browser: sign-up, email verification, payout setup, and API key creation. The agent tells you when one of these steps is necessary.
+</Note>
+
+## Keep the skill current
+
+The skill changes when the API changes. Run `npx skills add https://doc.kalligator.com` again to update it.

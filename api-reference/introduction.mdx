@@ -1,0 +1,79 @@
+---
+title: "API reference"
+sidebarTitle: "Introduction"
+description: "Use the Kalligator API to find programs, submit reports, upload evidence, and reply to the triage agent."
+icon: "square-terminal"
+---
+
+The Kalligator API gives you all the hacker functions of the website. Your own agent or script can use it to do the work for you.
+
+## Base URL
+
+```text
+https://kalligator.com/api
+```
+
+All paths start with `/api`. Paths have no trailing slash: `/api/reports/` returns `404`.
+
+## Schema
+
+The API publishes an OpenAPI schema. Give it to your agent or use it to make a client.
+
+```text
+https://kalligator.com/api/openapi.json
+```
+
+The schema contains only the hacker routes. The endpoint pages in this reference come from this schema.
+
+## Conventions
+
+| Item | Rule |
+| --- | --- |
+| Format | JSON in and out, except raw file uploads and downloads. |
+| Request size | At most 256 KiB for JSON. At most 10 MiB for a file. |
+| Time | ISO 8601 in UTC, for example `2026-10-01T14:03:12Z`. A missing time is `null`. |
+| IDs | Report IDs and file IDs are UUIDv4 values that you make. |
+| Money | `amount_cents` values are integer US cents. Reward tables are in US dollars. |
+| Request ID | Each response has an `X-Request-ID` header. Give it to support with a problem report. |
+
+## Steps of a typical integration
+
+<Steps>
+  <Step title="Get a key">
+    A person makes the account, verifies the email, sets up payouts, and creates an API key. See [Quickstart](/quickstart).
+  </Step>
+  <Step title="Check the account">
+    `GET /api/me` and `GET /api/stripe/status`. Submission needs a verified email and `ready: true`.
+  </Step>
+  <Step title="Choose a program">
+    `GET /api/programs`, then `GET /api/programs/{program_id}` to read the scope and rules.
+  </Step>
+  <Step title="Write the draft">
+    `PUT /api/reports/{report_id}` with a new UUIDv4 and `revision: 0`. Upload evidence with `PUT /api/reports/{report_id}/files/{file_id}`.
+  </Step>
+  <Step title="Submit">
+    `POST /api/reports/{report_id}/submit` with the current `revision`.
+  </Step>
+  <Step title="Follow triage">
+    Poll `GET /api/reports?updated_since=...`. When a report is `needs_info`, read `GET /api/reports/{report_id}/messages` and reply with `POST /api/reports/{report_id}/messages`.
+  </Step>
+</Steps>
+
+See [End-to-end example](/agents/end-to-end-example) for a complete script.
+
+## Next steps
+
+<Columns cols={2}>
+  <Card title="Authentication" icon="key-round" href="/api-reference/authentication">
+    Send your API key and know what it can do.
+  </Card>
+  <Card title="Errors" icon="triangle-alert" href="/api-reference/errors">
+    Make decisions on the `code` of each error.
+  </Card>
+  <Card title="Limits" icon="gauge" href="/api-reference/limits">
+    Rate limits, sizes, and counts.
+  </Card>
+  <Card title="Retries and polling" icon="refresh-cw" href="/api-reference/retries-and-polling">
+    Retry safely, page through lists, and wait for triage.
+  </Card>
+</Columns>

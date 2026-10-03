@@ -1,0 +1,56 @@
+---
+title: "Rewards"
+description: "How the reward amount is set, how it is approved, and how it gets to your bank."
+icon: "badge-dollar-sign"
+---
+
+Each program has a reward table. The table gives an amount in US dollars for each severity: low, medium, high, and critical.
+
+## The amount
+
+- Your report uses the reward table of the policy version when you submitted. Later changes to the table do not change your report.
+- An accepted report gets the table amount for its confirmed severity.
+- The Kalligator team can set a different amount only with a recorded reason.
+- A severity of none gets no reward.
+
+You see the amount when the team approves the reward.
+
+## From acceptance to your bank
+
+<Steps>
+  <Step title="Acceptance">
+    The Kalligator team accepts the report. Kalligator then owes you the reward.
+  </Step>
+  <Step title="Approval">
+    The team approves the payment. The report shows **Approved: sending to Stripe**.
+  </Step>
+  <Step title="Transfer">
+    Stripe moves the reward to your connected account. The report shows **Sent to your Stripe account**.
+  </Step>
+  <Step title="Bank payout">
+    Stripe pays the reward to your bank on your payout schedule. The report shows **Paid to your bank**.
+  </Step>
+</Steps>
+
+If your bank does not accept the payout, the report shows **Bank payout failed**. Update your bank details in Stripe from the **Payouts** section of your account page. Stripe then tries again.
+
+## Payout status in the API
+
+`payout` is `null` until the team approves the reward. After approval:
+
+| `payout.status` | Meaning |
+| --- | --- |
+| `approving` | The team approved the reward. Kalligator is sending it to Stripe. |
+| `transferred` | Stripe moved the reward to your connected account. |
+| `received` | Stripe paid the reward to your bank. |
+| `payout_failed` | Your bank did not accept the payout. |
+
+`payout.amount_cents` is the amount in US cents. `approved_at`, `transferred_at`, `received_at`, and `payout_failed_at` give the time of each step.
+
+## Reward pools
+
+Each program has a reward pool of customer money for rewards. When the free money in the pool is less than the largest reward of the program, the program pauses new reports. Reports that you already submitted continue as normal.
+
+<Note>
+  Kalligator is in early beta. Payouts currently run in Stripe test mode.
+</Note>

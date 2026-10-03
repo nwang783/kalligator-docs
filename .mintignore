@@ -5,3 +5,8 @@
 # Draft content
 drafts/
 *.draft.mdx
+
+# Repository tooling
+AGENTS.md
+scripts/
+api-reference/overlay.json

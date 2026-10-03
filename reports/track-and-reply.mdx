@@ -1,0 +1,97 @@
+---
+title: "Track a report and reply"
+description: "Follow the status of a report, answer questions from the triage agent, send more evidence, and withdraw a report."
+icon: "messages-square"
+---
+
+After you submit, open the report from **My reports**. A submitted report has these tabs:
+
+| Tab | What it shows |
+| --- | --- |
+| **Messages** | The thread with the triage agent and the Kalligator team. |
+| **Report** | The frozen copy of your report. |
+| **Files** | The files that you submitted. Files that you sent with a message are in **Messages**. |
+| **Program rules** | The program policy when you submitted. |
+| **Withdraw** | Withdraw the report. Shown only before a final decision. |
+
+## Statuses
+
+| Status | Meaning |
+| --- | --- |
+| **In triage** | The triage agent is working on the report, or the turn is in the queue. |
+| **Needs your reply** | The triage agent asked you a question. |
+| **Paused** | Triage stopped for a time. This is not a decision. |
+| **In review** | The Kalligator team is reviewing the report. |
+| **Accepted** | The report is valid. A reward follows if the report has a severity. |
+| **Rejected** | The report is not valid. The message tells you why. |
+| **Duplicate** | An earlier valid report or a known issue has the same flaw. |
+| **Closed: insufficient information** | The report did not have enough information to reproduce the flaw. |
+| **Withdrawn** | You withdrew the report. |
+
+See [Report lifecycle](/policies/report-lifecycle) for the full rules.
+
+## Reply to the triage agent
+
+When the status is **Needs your reply**, the report page shows **The triage agent asked you a question**.
+
+1. Open **Messages** and read the question.
+2. Type your answer. To add evidence, select **Attach**.
+3. Select **Send**, or press Cmd+Enter or Ctrl+Enter.
+
+Your reply starts the next triage turn. The status changes to **In triage**.
+
+<Tip>
+  Answer the exact question. Give the request, the account, or the file that the agent asked for. If a reply first makes the flaw reproducible, that reply can set the priority time of your report. See [Duplicates](/policies/duplicates).
+</Tip>
+
+Before the triage agent closes a report for missing information, it is instructed to warn you in a question first. There is no automatic reply deadline.
+
+## Send more information
+
+Before a final decision, you can send a message in any of these statuses: **In triage**, **Needs your reply**, **Paused**, and **In review**.
+
+- In **Needs your reply**, the message is a reply and starts a turn.
+- In **In triage**, the agent reads the message on its next turn.
+- In **Paused** or **In review**, the Kalligator team reads the message when it reviews the report.
+
+| Limit | Value |
+| --- | --- |
+| Message length | 12,000 characters |
+| Files in each message | 10 |
+| Size of each file | 10 MB |
+| Files on a report in total | 40 |
+
+A message can have only files and no text.
+
+## Withdraw a report
+
+You can withdraw a report before the final decision.
+
+1. Open the **Withdraw** tab.
+2. Select **Withdraw report**, then **Confirm withdrawal**.
+
+Withdrawal stops triage. If the report holds an active-report slot (**In triage**, **Needs your reply**, or **Paused**), withdrawal gives it back. You cannot edit or submit the report again. The report stays readable.
+
+You cannot withdraw a draft. A draft does not use a slot.
+
+## Appeal a decision
+
+After a final decision, you cannot send messages on the report. To appeal, send an email to [nathan@kalligator.com](mailto:nathan@kalligator.com) with the report ID.
+
+## Track reports with the API
+
+Poll for changes with `updated_since`. Then read the thread of each report that needs your reply.
+
+```bash Get changed reports
+curl "https://kalligator.com/api/reports?updated_since=2026-10-01T12:00:00Z" \
+  -H "Authorization: Bearer $KALLIGATOR_API_KEY"
+```
+
+```bash Reply to the agent
+curl -X POST "https://kalligator.com/api/reports/$REPORT_ID/messages" \
+  -H "Authorization: Bearer $KALLIGATOR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"body": "The test account is hacker1@example.com. The request is in the attached file.", "files": ["'$FILE_ID'"]}'
+```
+
+To attach a file to a message, first upload it with [`PUT /api/reports/{report_id}/files/{file_id}`](/api-reference/files/upload-a-file). Then send its ID in `files`. See [Retries and polling](/api-reference/retries-and-polling).

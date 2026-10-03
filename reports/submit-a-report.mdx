@@ -1,0 +1,73 @@
+---
+title: "Submit a report"
+description: "Complete the submission checklist and send your report to triage."
+icon: "send"
+---
+
+When you submit, triage starts. You cannot edit the report after submission.
+
+## Before you submit
+
+The draft page shows a **Before you submit** checklist. All items must be done.
+
+| Item | What to do |
+| --- | --- |
+| **Verify your email** | Open the link in the verification email. |
+| **Set up payouts with Stripe** | Get the Stripe status **Ready**. See [Set up payouts](/account/payouts). |
+| **Complete every field** | Complete **Title**, **Affected asset**, and **Description**. |
+| **Finish or remove unfinished uploads** | Wait for uploads to finish, or remove them. |
+| **Have a free report slot** | You can have at most five active reports. |
+
+If the program is paused or closed, the checklist also shows **The program is paused** or **The program is closed**. You cannot submit to that program until it opens again.
+
+Select **Check again** to update the checklist.
+
+## Submit
+
+Select **Submit report**. The page checks the requirements again, then shows **Report submitted**. The status changes to **In triage**.
+
+At submission, Kalligator freezes:
+
+- The report content and the ready files
+- The program policy and reward table, with its policy version
+
+The **Program rules** tab of the report shows the rules that applied when you submitted. Later changes to the program do not change your report.
+
+## Active-report slots
+
+You can have at most five active reports. A report holds a slot when its status is **In triage**, **Needs your reply**, or **Paused**. Drafts and withdrawn reports do not use a slot.
+
+If all five slots are in use, wait for a decision or [withdraw a report](/reports/track-and-reply#withdraw-a-report).
+
+## Submit with the API
+
+Send the current draft `revision`.
+
+```bash Submit a draft
+curl -X POST "https://kalligator.com/api/reports/$REPORT_ID/submit" \
+  -H "Authorization: Bearer $KALLIGATOR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"revision": 3}'
+```
+
+To send the same request again is safe. The API returns the submitted report and does not start a second triage.
+
+### Submission errors
+
+| HTTP | `code` | What to do |
+| --- | --- | --- |
+| 403 | `email_unverified` | Verify the account email. |
+| 403 | `stripe_not_ready` | Complete Stripe onboarding on the website. |
+| 409 | `revision_conflict` | Read `current` in the error body. Use its `revision`. |
+| 422 | `incomplete_report` | Complete all required fields. |
+| 409 | `files_pending` | Finish or remove the unfinished uploads. |
+| 409 | `program_closed` | The program does not accept reports now. |
+| 409 | `pool_low` | The program paused new reports. Try again later. |
+| 409 | `active_limit` | You have five active reports. |
+| 503 | `stripe_unavailable` | Wait, then try again. The draft is kept. |
+
+See [Errors](/api-reference/errors) for all error codes.
+
+## Next step
+
+[Track the report and reply to triage](/reports/track-and-reply).

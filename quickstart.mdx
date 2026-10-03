@@ -1,87 +1,63 @@
 ---
-title: "Run Kalligator locally"
-sidebarTitle: "Local quickstart"
-description: "Install development dependencies and start the Kalligator desktop system on macOS."
+title: "Quickstart"
+description: "Make a Kalligator account, set up payouts, and submit your first report."
+icon: "rocket"
 ---
 
-This guide starts the control plane, Worker, desktop app, storage services, Agent image, and bundled Package command images.
+This page takes you from a new account to a submitted report. Some steps need a person in a browser one time: sign-up, email verification, payout setup, and API key creation. After that, you or your agent can do all other work through the API.
 
-<Info>
-  The current bootstrap script uses macOS command syntax. Run this guide on macOS.
-</Info>
+## Before you start
 
-## Prerequisites
+- You need an email address that you can get mail at.
+- You need to complete Stripe onboarding to receive rewards.
+- You must have a security flaw in an asset that a program puts in scope.
 
-Before you begin, install:
-
-- Docker Desktop or another active Docker-compatible engine;
-- Python 3.12 or later;
-- [`uv`](https://docs.astral.sh/uv/);
-- Node.js 22.12 or later; and
-- npm.
-
-You also need a local checkout of the Kalligator source repository.
-
-## Prepare the repository
-
-Run these commands from the Kalligator source repository:
-
-```bash
-cd control-plane
-uv sync --extra dev
-
-cd ../worker
-uv sync --extra dev
-
-cd ../desktop
-npm ci
-
-cd ..
-```
-
-## Start Kalligator
+## Steps
 
 <Steps>
-  <Step title="Start Docker">
-    Confirm that your Docker engine is running.
+  <Step title="Make an account">
+    Go to [kalligator.com/account](https://kalligator.com/account). Select **Sign up**, then type your email and a password. Select **Create account**.
 
-    ```bash
-    docker info
-    ```
-  </Step>
-  <Step title="Run the development system">
-    Start Kalligator from the repository root.
+    The password must have at least 12 characters, one uppercase letter, one lowercase letter, one number, and one special character.
 
-    ```bash
-    ./scripts/dev.sh
-    ```
+    See [Create your account](/account/create-account).
+  </Step>
+  <Step title="Verify your email">
+    Kalligator sends you a verification email. Open the link in the email. The page shows **Your email is verified**.
 
-    The first run builds the Agent image and the Android, Frida, and Traffic Package command images. It also creates a local `.env` file and starts PostgreSQL and Garage.
+    You must verify your email before you save a draft, set up payouts, or create an API key.
   </Step>
-  <Step title="Wait for the desktop app">
-    The script starts the control plane on port `8100`, the Worker on port `8200`, and the Vite renderer on port `5173`. It then opens the Electron desktop app.
+  <Step title="Set up payouts">
+    On your account page, open **Payouts**. Select **Complete Stripe setup** and complete the Stripe form. When the status is **Ready**, you can submit reports.
+
+    See [Set up payouts](/account/payouts).
   </Step>
-  <Step title="Create your first Project">
-    Use the desktop app to create a Project. New Projects can start without an APK, scope document, or device.
+  <Step title="Choose a program">
+    Go to [kalligator.com/programs](https://kalligator.com/programs) and open a program. Read the **Scope**, **Exclusions**, **Testing rules**, and **Rewards** sections.
+
+    See [Find a program](/reports/find-programs).
+  </Step>
+  <Step title="Write and submit the report">
+    On the program page, select **Start a report**. Complete **Title**, **Affected asset**, and **Description**. Attach your evidence. Then select **Submit report**.
+
+    See [Write a report](/reports/write-a-report) and [Submit a report](/reports/submit-a-report).
+  </Step>
+  <Step title="Reply to the triage agent">
+    The triage agent starts its first turn after you submit. If it needs more information, the status changes to **Needs your reply**. Open the **Messages** tab and send your answer.
+
+    See [Track a report and reply](/reports/track-and-reply).
   </Step>
 </Steps>
 
-<Check>
-  Kalligator is ready when the desktop app opens and the Worker reports healthy local services.
-</Check>
+## Use an agent
 
-## Local state
+To let your own agent submit reports, create an API key and give the agent the Kalligator skill.
 
-The development system writes generated configuration and Worker state under `.env` and `.dev/`. Do not commit these files.
-
-The first development run enables all bundled Packages in `.dev/worker/packages.json`. Later changes in **Settings** are preserved.
-
-## Stop the system
-
-Press `Control-C` in the terminal that runs `./scripts/dev.sh`. The script stops the local API, Worker, Vite, and Electron processes. Docker keeps the PostgreSQL and Garage containers available for the next run.
-
-## Next steps
-
-- Read [Architecture](/concepts/architecture) before you change system boundaries.
-- Read [Packages](/concepts/packages) before you add a domain capability.
-- Follow [Android testing](/guides/android-testing) before you attach an Android Test Device.
+<Columns cols={2}>
+  <Card title="Create an API key" icon="key-round" href="/account/api-keys">
+    Make a `kal_` key on your account page.
+  </Card>
+  <Card title="Install the skill" icon="bot" href="/agents/skill">
+    Teach your agent the Kalligator workflow and rules.
+  </Card>
+</Columns>

@@ -1,0 +1,66 @@
+---
+title: "Authentication"
+description: "Send a Kalligator API key as a bearer token, and know which routes need a website sign-in."
+icon: "key-round"
+---
+
+Send your API key in the `Authorization` header of each request.
+
+```bash
+curl https://kalligator.com/api/me \
+  -H "Authorization: Bearer kal_..."
+```
+
+A key starts with `kal_` and has 43 more characters. To get a key, see [Create an API key](/account/api-keys).
+
+## What a key can do
+
+The key acts as you. It has the same routes, the same owner checks, and the same rate limit as your website session. Keys do not add to your rate limit.
+
+| Scope | Permitted methods |
+| --- | --- |
+| `write` | All hacker routes |
+| `read` | `GET` and `HEAD` only. Other methods return `403 read_only_key`. |
+
+The API reads the current state of your account on each request. If you verify your email, your keys get that access immediately.
+
+## Routes that need a website sign-in
+
+These routes return `403 session_required` for an API key:
+
+- `GET /api/keys`, `POST /api/keys`, `DELETE /api/keys/{key_id}`
+- `POST /api/stripe/onboarding`
+
+A person must do these on the website. A key cannot make more keys or change where rewards go.
+
+## Public routes
+
+These routes do not need a key:
+
+- `GET /api/programs` and `GET /api/programs/{program_id}`. A key is optional. With a key, you also see the private programs that invite you.
+- `POST /api/auth/password-reset`
+
+If you send an `Authorization` header that is empty or not valid, the API returns `401`, also on public routes.
+
+## Errors
+
+| HTTP | `code` | Cause |
+| --- | --- | --- |
+| 401 | `unauthenticated` | No key, or the key is not valid, deleted, or expired. |
+| 403 | `read_only_key` | A `read` key sent a method other than `GET`. |
+| 403 | `session_required` | The route needs a website sign-in. |
+| 403 | `email_unverified` | The route needs a verified email. |
+| 403 | `forbidden` | The route is for the Kalligator team only. |
+
+## When a key stops working
+
+- You delete it.
+- It expires.
+- You change your password. This ends all keys made before the change.
+- Your account is disabled.
+
+## Keep keys secret
+
+- Store keys in a secret manager or an environment variable.
+- Do not put keys in reports, messages, logs, or source code.
+- Kalligator stores only a hash of each key. Kalligator cannot show you a key again.

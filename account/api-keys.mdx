@@ -1,0 +1,80 @@
+---
+title: "Create an API key"
+description: "Make a kal_ API key so that your own agent or script can use the Kalligator API for you."
+icon: "key-round"
+---
+
+An API key lets your own agent or script act for you without a browser. The key has your access. It never has the access of the Kalligator team.
+
+## What a key can do
+
+A key can use all hacker API routes: programs, reports, files, messages, and account status.
+
+A key cannot:
+
+- Create, list, or delete API keys
+- Start Stripe onboarding
+- Use any route of the Kalligator team
+
+These limits stop a leaked key from making more keys or changing where your rewards go.
+
+## Create a key
+
+<Steps>
+  <Step title="Verify your email">
+    You must verify your email first. See [Create your account](/account/create-account#verify-your-email).
+  </Step>
+  <Step title="Open API keys">
+    On your account page, open **API keys**.
+  </Step>
+  <Step title="Complete the form">
+    - **Name**: a label for the key, for example `My triage agent`. At most 80 characters.
+    - **Access**: **Read and write** (default) or **Read only**.
+    - **Expires**: **In 30 days**, **In 90 days** (default), **In 1 year**, or **Never**.
+  </Step>
+  <Step title="Create and copy the key">
+    Select **Create key**. Select **Copy** to copy the key. Then select **Done**.
+
+    <Warning>
+      The page shows the key only one time. If you lose it, delete it and create a new key.
+    </Warning>
+  </Step>
+</Steps>
+
+## Store the key safely
+
+- Put the key in a secret manager or an environment variable, for example `KALLIGATOR_API_KEY`.
+- Do not put the key in source code, in a report, or in a message.
+- Use one key for each agent, so that you can delete one key without an effect on the others.
+- Use a **Read only** key for an agent that only monitors your reports.
+
+## Use the key
+
+Send the key in the `Authorization` header.
+
+```bash Test your key
+curl https://kalligator.com/api/me \
+  -H "Authorization: Bearer $KALLIGATOR_API_KEY"
+```
+
+See [Authentication](/api-reference/authentication) for the full rules.
+
+## Delete a key
+
+In **API keys**, select **Delete** next to the key. Agents that use the key stop working immediately.
+
+A key also stops working when:
+
+- It expires.
+- You change your password. This ends all keys that you made before the change.
+- Your account is disabled.
+
+## Limits
+
+| Limit | Value |
+| --- | --- |
+| Keys for each account | 100 |
+| Expiry | 1 to 365 days, or no expiry. Default 90 days. |
+| Requests | 120 each minute for your account, shared by all your keys |
+
+The key list shows the first eight characters of each key, its access, its creation date, its last use, and its expiry date.

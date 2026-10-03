@@ -1,0 +1,96 @@
+---
+title: "Errors"
+description: "The error body, the error codes of the hacker API, and what to do for each."
+icon: "triangle-alert"
+---
+
+Every error has the same JSON body:
+
+```json
+{
+  "detail": "You have five active reports. Need help? Email nathan@kalligator.com.",
+  "code": "active_limit"
+}
+```
+
+- `code` is stable. Make decisions in your code on `code`.
+- `detail` is a message for a person. It can change.
+- On `409 revision_conflict`, the body also has `current`, the stored report.
+
+## Retry rules
+
+| Response | What to do |
+| --- | --- |
+| `429` | Wait for the number of seconds in `Retry-After`, then send the request again. |
+| `503` | Wait for `Retry-After` seconds if the header is set. If not, wait about a minute. Then send the request again. |
+| `409 revision_conflict` | Read `current`. Merge your change. Send it again with `current.revision`. |
+| Other `4xx` | Do not send the same request again. Correct the cause first. |
+
+## Error codes
+
+### Authentication and access
+
+| HTTP | `code` | Meaning |
+| --- | --- | --- |
+| 401 | `unauthenticated` | The key or token is missing, not valid, expired, or revoked. |
+| 403 | `email_unverified` | Verify the account email first. |
+| 403 | `read_only_key` | A `read` key sent a method other than `GET`. |
+| 403 | `session_required` | The route needs a website sign-in. API keys cannot use it. |
+| 403 | `forbidden` | The route is for the Kalligator team only. |
+| 404 | `not_found` | The program or report does not exist, or it is not yours. |
+
+### Reports
+
+| HTTP | `code` | Meaning |
+| --- | --- | --- |
+| 409 | `revision_conflict` | The report changed in a different session. The body has `current`. |
+| 409 | `invalid_state` | The action is not permitted in the current status. |
+| 409 | `program_closed` | The program does not accept reports. |
+| 409 | `pool_low` | The program paused new reports because its reward pool is low. |
+| 409 | `active_limit` | You have five active reports. |
+| 422 | `incomplete_report` | A required field is empty at submission. |
+| 403 | `stripe_not_ready` | Your Stripe payout account is not ready. |
+
+### Files
+
+| HTTP | `code` | Meaning |
+| --- | --- | --- |
+| 409 | `file_limit` | The report has the maximum number of files. |
+| 409 | `file_busy` | An operation on this file is in progress. |
+| 409 | `file_conflict` | The file ID exists with different content. |
+| 409 | `file_referenced` | Remove the Markdown links to the file first. |
+| 409 | `files_pending` | An upload is not finished. Finish or remove it before you submit. |
+| 409 | `file_not_ready` | A message file is not uploaded and ready. |
+| 422 | `invalid_filename` | The file name has a folder separator or a control character. |
+| 422 | `empty_file` | The file has no bytes. |
+| 422 | `invalid_file_reference` | A link points to a file that is not a ready file of this report. |
+| 503 | `storage_unavailable` | Storage failed. Try again. |
+| 503 | `storage_unconfigured` | File storage is not set up on the server. |
+
+### Keys
+
+| HTTP | `code` | Meaning |
+| --- | --- | --- |
+| 409 | `key_limit` | You have 100 keys. Delete one first. |
+
+### Requests
+
+| HTTP | `code` | Meaning |
+| --- | --- | --- |
+| 408 | `request_timeout` | The request body took too long to send. |
+| 413 | `too_large` | The body is larger than the limit. |
+| 422 | `validation_error` | A field or parameter is not valid. `detail` names the field when possible. |
+| 429 | `rate_limited` | Too many requests. Wait for `Retry-After` seconds. |
+| 405 | `invalid_state` | The method is not permitted on this path. |
+| 500 | `internal_error` | An unexpected server error. Try again later. If it continues, send the `X-Request-ID` to support. |
+| 503 | `busy` | A temporary conflict on the server. Wait for `Retry-After` seconds and try again. |
+
+### Payouts and email
+
+| HTTP | `code` | Meaning |
+| --- | --- | --- |
+| 409 | `onboarding_in_progress` | A Stripe onboarding request started less than a minute ago. Wait for `Retry-After` seconds. |
+| 503 | `stripe_unconfigured` | Stripe is not set up on the server. |
+| 503 | `stripe_unavailable` | Stripe did not answer. Try again later. |
+| 503 | `email_unconfigured` | The server cannot send email now. |
+| 503 | `email_unavailable` | The email was not sent. Try again later. |
