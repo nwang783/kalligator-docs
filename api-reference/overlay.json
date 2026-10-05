@@ -138,7 +138,7 @@
     },
     "PUT /api/reports/{report_id}/files/{file_id}": {
       "summary": "Upload a file",
-      "description": "Uploads the raw bytes of one evidence file. Send the file MIME type as `Content-Type`, or `application/octet-stream`. The response is the updated report: use its new `revision` for your next change.\n\nOn a draft, the file attaches to the report. Before a final decision, the file waits as message evidence until you send it with a message.\n\nLimits: 10 files on a draft, 10 MiB for each file, 10 pending message files, and 40 files on a report in total. To upload the same bytes with the same file ID again is safe.",
+      "description": "Uploads the raw bytes of one evidence file. Send the file MIME type as `Content-Type`, or `application/octet-stream`. The response is the updated report: use its new `revision` for your next change. A new upload adds 2 to the revision: one for the reservation and one when the file is ready. Always use the `revision` in the response. Do not add 1 yourself.\n\nOn a draft, the file attaches to the report. Before a final decision, the file waits as message evidence until you send it with a message.\n\nLimits: 10 files on a draft, 10 MiB for each file, 10 pending message files, and 40 files on a report in total. To upload the same bytes with the same file ID again is safe.",
       "parameters": {
         "report_id": {
           "description": "The report ID."
